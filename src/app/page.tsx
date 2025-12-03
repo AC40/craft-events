@@ -1,28 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import UrlForm from '@/components/urlForm';
 import DocumentSelector from '@/components/documentSelector';
 import EventForm from '@/components/eventForm';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { encryptSecrets, createBlocks } from '@/app/actions';
+import { addEventToHistory, loadEventHistory, type EventHistoryEntry } from '@/lib/eventHistory';
 import type { CraftDocument } from '@/lib/craftApi';
 import type { EventFormData } from '@/components/eventForm';
 
 export default function Home() {
+  const router = useRouter();
   const [encryptedBlob, setEncryptedBlob] = useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<CraftDocument | null>(null);
   const [isInserting, setIsInserting] = useState(false);
   const [insertError, setInsertError] = useState<string | null>(null);
-  const [insertSuccess, setInsertSuccess] = useState(false);
+  const [eventHistory, setEventHistory] = useState<EventHistoryEntry[]>([]);
+  const [historyVisible, setHistoryVisible] = useState(true);
+
+  useEffect(() => {
+    setEventHistory(loadEventHistory());
+  }, []);
 
   const handleUrlSubmit = async (url: string, key?: string) => {
     try {
       const blob = await encryptSecrets({ apiUrl: url, apiKey: key });
       setEncryptedBlob(blob);
       setSelectedDocument(null);
-      setInsertSuccess(false);
       setInsertError(null);
     } catch (error) {
       setInsertError(error instanceof Error ? error.message : 'Failed to encrypt credentials');
@@ -32,7 +40,6 @@ export default function Home() {
   const handleDocumentSelect = async (document: CraftDocument) => {
     setSelectedDocument(document);
     setInsertError(null);
-    setInsertSuccess(false);
   };
 
   const createEventMutation = useMutation({
@@ -120,27 +127,25 @@ export default function Home() {
         throw new Error('Failed to get table block ID after creation');
       }
 
-      const eventPageUrl = `${baseUrl}/event/${tableBlockId}?blob=${encodeURIComponent(blob)}`;
+      const encodedTitle = encodeURIComponent(eventTitle);
+      const voteUrl = `${baseUrl}/event/${tableBlockId}?blob=${encodeURIComponent(blob)}&title=${encodedTitle}`;
+      const resultsUrl = `${baseUrl}/event/${tableBlockId}/results?blob=${encodeURIComponent(blob)}&title=${encodedTitle}`;
       const linkBlock = {
         type: 'text',
-        markdown: `[Vote on availability →](${eventPageUrl})`,
+        markdown: `[Vote on availability →](${voteUrl})\n\n[View live results →](${resultsUrl})`,
       };
 
       await createBlocks(blob, pageId, [linkBlock]);
 
-      return { pageId, tableBlockId };
+      return { pageId, tableBlockId, voteUrl, resultsUrl };
     },
   });
-
-  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   const handleEventSubmit = async (data: EventFormData) => {
     if (!selectedDocument || !encryptedBlob) return;
 
     setIsInserting(true);
     setInsertError(null);
-    setInsertSuccess(false);
-    setCreatedEventId(null);
 
     try {
       const selectedSlots = data.timeSlots.filter((slot) => slot.selected);
@@ -155,9 +160,17 @@ export default function Home() {
         blob: encryptedBlob,
         baseUrl,
       });
-      
-      setCreatedEventId(result.tableBlockId);
-      setInsertSuccess(true);
+      const history = addEventToHistory({
+        blockId: result.tableBlockId,
+        title: data.title,
+        documentTitle: selectedDocument.title,
+        blob: encryptedBlob,
+        voteUrl: result.voteUrl,
+        resultsUrl: result.resultsUrl,
+        createdAt: Date.now(),
+      });
+      setEventHistory(history);
+      router.push(result.resultsUrl);
     } catch (error) {
       setInsertError(error instanceof Error ? error.message : 'Failed to create event');
     } finally {
@@ -168,30 +181,61 @@ export default function Home() {
   const handleReset = () => {
     setEncryptedBlob(null);
     setSelectedDocument(null);
-    setInsertSuccess(false);
     setInsertError(null);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="mx-auto max-w-4xl space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Craft Events
-          </h1>
-          <p className="text-lg text-gray-600">
-            Connect to your Craft documents
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Craft Events</h1>
+          <p className="text-lg text-gray-600">Connect to your Craft documents</p>
         </div>
+
+        {eventHistory.length > 0 && (
+          <Card className="border-blue-100 bg-white">
+            <CardHeader className="flex items-center justify-between gap-4">
+              <CardTitle className="text-base font-semibold text-gray-900">
+                Previously accessed events
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setHistoryVisible((prev) => !prev)}>
+                {historyVisible ? 'Hide history' : 'Show history'}
+              </Button>
+            </CardHeader>
+            {historyVisible && (
+              <CardContent className="space-y-4">
+                {eventHistory.map((entry) => (
+                  <div
+                    key={entry.blockId}
+                    className="flex flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{entry.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.documentTitle ? `${entry.documentTitle} · ` : ''}
+                        {new Date(entry.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2 sm:mt-0">
+                      <Button size="sm" variant="outline" onClick={() => router.push(entry.resultsUrl)}>
+                        View results
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => router.push(entry.voteUrl)}>
+                        Open voting
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            )}
+          </Card>
+        )}
 
         {!encryptedBlob ? (
           <UrlForm onSubmit={handleUrlSubmit} />
         ) : !selectedDocument ? (
           <>
-            <DocumentSelector
-              encryptedBlob={encryptedBlob}
-              onSelect={handleDocumentSelect}
-            />
+            <DocumentSelector encryptedBlob={encryptedBlob} onSelect={handleDocumentSelect} />
             <div className="text-center">
               <Button variant="outline" onClick={handleReset}>
                 Use Different URL
@@ -201,47 +245,23 @@ export default function Home() {
         ) : (
           <>
             <EventForm documentTitle={selectedDocument.title} onSubmit={handleEventSubmit} />
-            
+
             {isInserting && (
-              <div className="text-center text-sm text-muted-foreground">
-                Creating event page...
+              <div
+                aria-live="polite"
+                className="flex items-center justify-center gap-2 rounded border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700"
+              >
+                <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+                Creating a new event page...
               </div>
             )}
-            
-            {insertSuccess && createdEventId && encryptedBlob && (
-              <div className="text-sm text-green-600 bg-green-50 p-4 rounded space-y-2">
-                <div className="font-semibold">Successfully created event page!</div>
-                <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Share this URL with participants:</div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`}
-                      className="flex-1 px-2 py-1 text-xs border rounded bg-white font-mono"
-                      onClick={(e) => (e.target as HTMLInputElement).select()}
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`;
-                        await navigator.clipboard.writeText(url);
-                      }}
-                    >
-                      Copy
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
+
             {insertError && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded text-center">
                 {insertError}
               </div>
             )}
-            
+
             <div className="text-center">
               <Button variant="outline" onClick={handleReset}>
                 Select Different Document

@@ -1,21 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { modifyBlock } from '@/app/actions';
-import { updateTableWithVote, tableToMarkdown } from '@/lib/tableParser';
-import VotingForm from '@/components/votingForm';
+import ResultsView from '@/components/resultsView';
 import { useEventTable } from '@/lib/useEventTable';
 import { addEventToHistory } from '@/lib/eventHistory';
 
-export default function EventView() {
+export default function EventResultsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const blockId = params?.blockId as string;
   const encryptedBlob = searchParams.get('blob');
   const eventTitle = searchParams.get('title') || 'Event scheduling';
@@ -41,39 +37,13 @@ export default function EventView() {
     });
   }, [blockId, encryptedBlob, eventTitle, table]);
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ name, votes }: { name: string; votes: Record<number, boolean> }) => {
-      if (!encryptedBlob || !blockId || !table) {
-        throw new Error('Missing required data');
-      }
-
-      const updatedTable = updateTableWithVote(table, name, votes);
-      const newMarkdown = tableToMarkdown(updatedTable);
-      await modifyBlock(encryptedBlob, blockId, newMarkdown);
-
-      return { name, votes };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event_block', blockId, encryptedBlob] });
-      router.push(
-        `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob || '')}&title=${encodeURIComponent(
-          eventTitle
-        )}`
-      );
-    },
-  });
-
-  const handleVoteSubmit = async (name: string, votes: Record<number, boolean>) => {
-    await updateMutation.mutateAsync({ name, votes });
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-muted-foreground">Loading event...</p>
+              <p className="text-center text-muted-foreground">Loading results...</p>
             </CardContent>
           </Card>
         </div>
@@ -88,7 +58,7 @@ export default function EventView() {
           <Card>
             <CardContent className="p-6">
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
-                {error instanceof Error ? error.message : 'Failed to load event'}
+                {error instanceof Error ? error.message : 'Failed to load results'}
               </div>
               {block && (
                 <div className="mt-4 text-xs text-muted-foreground">
@@ -158,28 +128,28 @@ export default function EventView() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">Event polling</p>
+          <p className="text-sm text-muted-foreground">Event results</p>
           <h1 className="text-3xl font-semibold text-gray-900">{eventTitle}</h1>
         </div>
 
-        <VotingForm table={table} timeSlots={timeSlots} onSubmit={handleVoteSubmit} />
+        <ResultsView table={table} timeSlots={timeSlots} />
 
         <Card>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Preview the current availability without submitting another vote.
+              Need to update your availability? Head to the voting view.
             </p>
             <Button
               variant="outline"
               onClick={() =>
                 router.push(
-                  `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob || '')}&title=${encodeURIComponent(
+                  `/event/${blockId}?blob=${encodeURIComponent(encryptedBlob || '')}&title=${encodeURIComponent(
                     eventTitle
                   )}`
                 )
               }
             >
-              View live results
+              Vote again
             </Button>
           </CardContent>
         </Card>
