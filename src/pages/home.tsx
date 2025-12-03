@@ -1,63 +1,34 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import UrlForm from '@/components/urlForm';
-import DocumentSelector from '@/components/documentSelector';
-import EventForm from '@/components/eventForm';
-import { Button } from '@/components/ui/button';
-import { insertBlocks, type CraftDocument } from '@/lib/craftApi';
-import type { EventFormData } from '@/components/eventForm';
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import UrlForm from "@/components/urlForm";
+import DocumentSelector from "@/components/documentSelector";
+import EventForm from "@/components/eventForm";
+import { Button } from "@/components/ui/button";
+import { encryptSecrets, createBlocks } from "@/app/actions";
+import type { CraftDocument } from "@/lib/craftApi";
+import type { EventFormData } from "@/components/eventForm";
 
 export default function Home() {
-  const [apiUrl, setApiUrl] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
-  const [selectedDocument, setSelectedDocument] = useState<CraftDocument | null>(null);
+  const router = useRouter();
+  const [encryptedBlob, setEncryptedBlob] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] =
+    useState<CraftDocument | null>(null);
   const [isInserting, setIsInserting] = useState(false);
   const [insertError, setInsertError] = useState<string | null>(null);
   const [insertSuccess, setInsertSuccess] = useState(false);
 
-  const insertMutation = useMutation({
-    mutationFn: async ({ documentId }: { documentId: string }) => {
-      if (!apiUrl) throw new Error('API URL not set');
-      
-      const tableMarkdown = `| Name | Mo | Tu | We | Th | Fr |
-|------|----|----|----|----|----|
-|      |    |    |    |    |    |`;
-
-      const pageBlock = {
-        type: 'text',
-        textStyle: 'page',
-        markdown: 'Schedule',
-      };
-
-      const pageResponse = await insertBlocks(apiUrl, documentId, [pageBlock], apiKey);
-      const pageId = pageResponse.items[0]?.id;
-      
-      if (!pageId) {
-        throw new Error('Failed to get page ID after creation');
-      }
-
-      const tableBlock = {
-        type: 'text',
-        markdown: tableMarkdown,
-      };
-
-      await insertBlocks(apiUrl, pageId, [tableBlock], apiKey);
-      
-      return pageResponse;
-    },
-  });
-
-  const handleUrlSubmit = (url: string, key?: string) => {
-    setApiUrl(url);
-    setApiKey(key);
-    setSelectedDocument(null);
-    setInsertSuccess(false);
-    setInsertError(null);
-    localStorage.setItem('craftApiUrl', url);
-    if (key) {
-      localStorage.setItem('craftApiKey', key);
-    } else {
-      localStorage.removeItem('craftApiKey');
+  const handleUrlSubmit = async (url: string, key?: string) => {
+    try {
+      const blob = await encryptSecrets({ apiUrl: url, apiKey: key });
+      setEncryptedBlob(blob);
+      setSelectedDocument(null);
+      setInsertSuccess(false);
+      setInsertError(null);
+    } catch (error) {
+      setInsertError(
+        error instanceof Error ? error.message : "Failed to encrypt credentials"
+      );
     }
   };
 
@@ -65,7 +36,7 @@ export default function Home() {
     setSelectedDocument(document);
     setInsertError(null);
     setInsertSuccess(false);
-    
+
     // DISABLED: Insertion code kept for later use
     // setIsInserting(true);
     // try {
@@ -92,71 +63,82 @@ export default function Home() {
       location: string;
       timeSlots: Array<{ date: Date; hour: number }>;
     }) => {
-      if (!apiUrl) throw new Error('API URL not set');
+      if (!encryptedBlob) throw new Error("Encrypted blob not set");
 
-      const { formatTableHeader } = await import('@/lib/tableParser');
+      const { formatTableHeader } = await import("@/lib/tableParser");
 
       const pageTitle = `${eventTitle} – Scheduling`;
       const pageBlock = {
-        type: 'text',
-        textStyle: 'page',
+        type: "text",
+        textStyle: "page",
         markdown: pageTitle,
       };
 
-      const pageResponse = await insertBlocks(apiUrl, documentId, [pageBlock], apiKey);
+      const pageResponse = await createBlocks(encryptedBlob, documentId, [
+        pageBlock,
+      ]);
       const pageId = pageResponse.items[0]?.id;
 
       if (!pageId) {
-        throw new Error('Failed to get page ID after creation');
+        throw new Error("Failed to get page ID after creation");
       }
 
-      const blocks: Array<{ type: string; markdown?: string; textStyle?: string }> = [];
+      const blocks: Array<{
+        type: string;
+        markdown?: string;
+        textStyle?: string;
+      }> = [];
 
       if (description) {
         blocks.push({
-          type: 'text',
+          type: "text",
           markdown: description,
         });
       }
 
       if (location) {
         blocks.push({
-          type: 'text',
+          type: "text",
           markdown: location,
         });
       }
 
       if (blocks.length > 0) {
-        await insertBlocks(apiUrl, pageId, blocks, apiKey);
+        await createBlocks(encryptedBlob, pageId, blocks);
       }
 
       const separatorBlock = {
-        type: 'text',
-        markdown: '---',
+        type: "text",
+        markdown: "---",
       };
 
-      await insertBlocks(apiUrl, pageId, [separatorBlock], apiKey);
+      await createBlocks(encryptedBlob, pageId, [separatorBlock]);
 
-      const tableHeaders = ['Name', ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour))];
-      const tableSeparator = ['---', ...timeSlots.map(() => '---')];
-      const organiserRow = ['Organiser', ...timeSlots.map(() => '✅')];
+      const tableHeaders = [
+        "Name",
+        ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour)),
+      ];
+      const tableSeparator = ["---", ...timeSlots.map(() => "---")];
+      const organiserRow = ["Organiser", ...timeSlots.map(() => "✅")];
 
       const tableMarkdown = [
-        `| ${tableHeaders.join(' | ')} |`,
-        `| ${tableSeparator.join(' | ')} |`,
-        `| ${organiserRow.join(' | ')} |`,
-      ].join('\n');
+        `| ${tableHeaders.join(" | ")} |`,
+        `| ${tableSeparator.join(" | ")} |`,
+        `| ${organiserRow.join(" | ")} |`,
+      ].join("\n");
 
       const tableBlock = {
-        type: 'text',
+        type: "text",
         markdown: tableMarkdown,
       };
 
-      const tableResponse = await insertBlocks(apiUrl, pageId, [tableBlock], apiKey);
+      const tableResponse = await createBlocks(encryptedBlob, pageId, [
+        tableBlock,
+      ]);
       const tableBlockId = tableResponse.items[0]?.id;
 
       if (!tableBlockId) {
-        throw new Error('Failed to get table block ID after creation');
+        throw new Error("Failed to get table block ID after creation");
       }
 
       return { pageId, tableBlockId };
@@ -185,25 +167,26 @@ export default function Home() {
       setCreatedEventId(result.tableBlockId);
       setInsertSuccess(true);
     } catch (error) {
-      setInsertError(error instanceof Error ? error.message : 'Failed to create event');
+      setInsertError(
+        error instanceof Error ? error.message : "Failed to create event"
+      );
     } finally {
       setIsInserting(false);
     }
   };
 
   const handleReset = () => {
-    setApiUrl(null);
-    setApiKey(undefined);
+    setEncryptedBlob(null);
     setSelectedDocument(null);
     setInsertSuccess(false);
     setInsertError(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="p-8 min-h-screen bg-gray-50">
+      <div className="mx-auto space-y-8 max-w-4xl">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="mb-2 text-4xl font-bold text-gray-900">
             Craft Events
           </h1>
           <p className="text-lg text-gray-600">
@@ -211,13 +194,12 @@ export default function Home() {
           </p>
         </div>
 
-        {!apiUrl ? (
+        {!encryptedBlob ? (
           <UrlForm onSubmit={handleUrlSubmit} />
         ) : !selectedDocument ? (
           <>
             <DocumentSelector
-              apiUrl={apiUrl}
-              apiKey={apiKey}
+              encryptedBlob={encryptedBlob}
               onSelect={handleDocumentSelect}
             />
             <div className="text-center">
@@ -228,33 +210,52 @@ export default function Home() {
           </>
         ) : (
           <>
-            <EventForm documentTitle={selectedDocument.title} onSubmit={handleEventSubmit} />
-            
+            <EventForm
+              documentTitle={selectedDocument.title}
+              onSubmit={handleEventSubmit}
+            />
+
             {isInserting && (
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-sm text-center text-muted-foreground">
                 Creating event page...
               </div>
             )}
-            
-            {insertSuccess && createdEventId && apiUrl && (
-              <div className="text-sm text-green-600 bg-green-50 p-4 rounded space-y-2">
-                <div className="font-semibold">Successfully created event page!</div>
+
+            {insertSuccess && createdEventId && encryptedBlob && (
+              <div className="p-4 space-y-2 text-sm text-green-600 bg-green-50 rounded">
+                <div className="font-semibold">
+                  Successfully created event page!
+                </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Share this URL with participants:</div>
-                  <div className="flex items-center gap-2">
+                  <div className="text-xs text-muted-foreground">
+                    Share this URL with participants:
+                  </div>
+                  <div className="flex gap-2 items-center">
                     <input
                       type="text"
                       readOnly
-                      value={`${window.location.origin}/event/${createdEventId}?apiUrl=${encodeURIComponent(apiUrl)}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}`}
-                      className="flex-1 px-2 py-1 text-xs border rounded bg-white font-mono"
+                      value={`${
+                        typeof window !== "undefined"
+                          ? window.location.origin
+                          : ""
+                      }/event/${createdEventId}?blob=${encodeURIComponent(
+                        encryptedBlob
+                      )}`}
+                      className="flex-1 px-2 py-1 font-mono text-xs bg-white rounded border"
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        const url = `${window.location.origin}/event/${createdEventId}?apiUrl=${encodeURIComponent(apiUrl)}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}`;
-                        navigator.clipboard.writeText(url);
+                      onClick={async () => {
+                        const url = `${
+                          typeof window !== "undefined"
+                            ? window.location.origin
+                            : ""
+                        }/event/${createdEventId}?blob=${encodeURIComponent(
+                          encryptedBlob
+                        )}`;
+                        await navigator.clipboard.writeText(url);
                       }}
                     >
                       Copy
@@ -263,13 +264,13 @@ export default function Home() {
                 </div>
               </div>
             )}
-            
+
             {insertError && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded text-center">
+              <div className="p-3 text-sm text-center text-red-600 bg-red-50 rounded">
                 {insertError}
               </div>
             )}
-            
+
             <div className="text-center">
               <Button variant="outline" onClick={handleReset}>
                 Select Different Document

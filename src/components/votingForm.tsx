@@ -1,9 +1,15 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import type { ParsedTable } from '@/lib/tableParser';
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import type { ParsedTable } from "@/lib/tableParser";
 
 interface VotingFormProps {
   table: ParsedTable;
@@ -11,8 +17,12 @@ interface VotingFormProps {
   onSubmit: (name: string, votes: Record<number, boolean>) => Promise<void>;
 }
 
-export default function VotingForm({ table, timeSlots, onSubmit }: VotingFormProps) {
-  const [name, setName] = useState('');
+export default function VotingForm({
+  table,
+  timeSlots,
+  onSubmit,
+}: VotingFormProps) {
+  const [name, setName] = useState("");
   const [votes, setVotes] = useState<Record<number, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,11 +46,15 @@ export default function VotingForm({ table, timeSlots, onSubmit }: VotingFormPro
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const formatTime = (hour: number): string => {
-    const period = hour >= 12 ? 'PM' : 'AM';
+    const period = hour >= 12 ? "PM" : "AM";
     const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
     return `${displayHour}:00 ${period}`;
   };
@@ -49,7 +63,9 @@ export default function VotingForm({ table, timeSlots, onSubmit }: VotingFormPro
     <Card>
       <CardHeader>
         <CardTitle>Vote on Availability</CardTitle>
-        <CardDescription>Select the time slots you're available for</CardDescription>
+        <CardDescription>
+          Select the time slots you're available for
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -67,36 +83,48 @@ export default function VotingForm({ table, timeSlots, onSubmit }: VotingFormPro
 
           <div className="space-y-4">
             <Label>Select Available Time Slots</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {timeSlots.map((slot, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => toggleVote(index)}
                   className={`
-                    p-4 rounded-lg border-2 transition-all text-left
-                    ${votes[index]
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                    p-4 rounded-lg border-2 transition-all text-left min-h-[100px] flex flex-col justify-between
+                    ${
+                      votes[index]
+                        ? "bg-blue-50 border-blue-500"
+                        : "bg-white border-gray-200 hover:border-gray-300"
                     }
                   `}
                 >
-                  <div className="font-medium">{formatDate(slot.date)}</div>
-                  <div className="text-sm text-muted-foreground">{formatTime(slot.hour)}</div>
-                  {votes[index] && (
-                    <div className="mt-2 text-blue-600 font-bold">✓ Available</div>
-                  )}
+                  <div>
+                    <div className="font-medium">{formatDate(slot.date)}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {formatTime(slot.hour)}
+                    </div>
+                  </div>
+                  <div
+                    className={`mt-2 font-bold text-blue-600 ${
+                      votes[index] ? "" : "invisible"
+                    }`}
+                  >
+                    ✓ Available
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting || !name.trim()}>
-            {isSubmitting ? 'Submitting...' : 'Submit Vote'}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || !name.trim()}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Vote"}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
-

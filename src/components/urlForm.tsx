@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { normalizeApiUrl } from '@/lib/craftApi';
 
 interface UrlFormProps {
-  onSubmit: (apiUrl: string, apiKey?: string) => void;
+  onSubmit: (apiUrl: string, apiKey?: string) => Promise<void>;
 }
 
 export default function UrlForm({ onSubmit }: UrlFormProps) {
@@ -28,7 +28,7 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
     
     try {
       const normalizedUrl = normalizeApiUrl(url);
-      onSubmit(normalizedUrl, apiKey.trim() || undefined);
+      await onSubmit(normalizedUrl, apiKey.trim() || undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid URL format');
     } finally {

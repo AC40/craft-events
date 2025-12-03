@@ -10,18 +10,18 @@ export interface DocumentsResponse {
 
 export function normalizeApiUrl(url: string): string {
   let normalized = url.trim();
-  
-  if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+
+  if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {
     normalized = `https://${normalized}`;
   }
-  
-  if (!normalized.endsWith('/api/v1')) {
-    if (normalized.endsWith('/')) {
+
+  if (!normalized.endsWith("/api/v1")) {
+    if (normalized.endsWith("/")) {
       normalized = normalized.slice(0, -1);
     }
     normalized = `${normalized}/api/v1`;
   }
-  
+
   return normalized;
 }
 
@@ -30,22 +30,22 @@ export async function fetchDocuments(
   apiKey?: string
 ): Promise<DocumentsResponse> {
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    headers["Authorization"] = `Bearer ${apiKey}`;
   }
-  
+
   const response = await fetch(`${apiUrl}/documents`, {
-    method: 'GET',
+    method: "GET",
     headers,
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch documents: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -64,29 +64,29 @@ export async function insertBlocks(
   apiKey?: string
 ): Promise<InsertBlockResponse> {
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    headers["Authorization"] = `Bearer ${apiKey}`;
   }
-  
+
   const response = await fetch(`${apiUrl}/blocks`, {
-    method: 'POST',
+    method: "POST",
     headers,
     body: JSON.stringify({
       blocks,
       position: {
-        position: 'end',
+        position: "end",
         pageId: documentId,
       },
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to insert blocks: ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -105,29 +105,31 @@ export async function fetchBlock(
   maxDepth: number = -1
 ): Promise<Block> {
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    headers["Authorization"] = `Bearer ${apiKey}`;
   }
-  
-  const url = `${apiUrl}/blocks?id=${encodeURIComponent(blockId)}&maxDepth=${maxDepth}`;
+
+  const url = `${apiUrl}/blocks?id=${encodeURIComponent(
+    blockId
+  )}&maxDepth=${maxDepth}`;
   const response = await fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers,
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch block: ${response.statusText}`);
   }
-  
+
   const data = await response.json();
-  
+
   if (data.blocks && Array.isArray(data.blocks) && data.blocks.length > 0) {
     return data.blocks[0];
   }
-  
+
   return data;
 }
 
@@ -138,15 +140,15 @@ export async function updateBlock(
   apiKey?: string
 ): Promise<Block> {
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
-  
+
   if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    headers["Authorization"] = `Bearer ${apiKey}`;
   }
-  
+
   const response = await fetch(`${apiUrl}/blocks`, {
-    method: 'PUT',
+    method: "PUT",
     headers,
     body: JSON.stringify({
       blocks: [
@@ -157,12 +159,11 @@ export async function updateBlock(
       ],
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to update block: ${response.statusText}`);
   }
-  
+
   const result = await response.json();
   return result.items?.[0] || result;
 }
-

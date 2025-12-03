@@ -1,22 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { fetchDocuments, type CraftDocument } from '@/lib/craftApi';
+import { getDocuments } from '@/app/actions';
+import type { CraftDocument } from '@/lib/craftApi';
 
 interface DocumentSelectorProps {
-  apiUrl: string;
-  apiKey?: string;
+  encryptedBlob: string;
   onSelect: (document: CraftDocument) => void;
 }
 
 export default function DocumentSelector({
-  apiUrl,
-  apiKey,
+  encryptedBlob,
   onSelect,
 }: DocumentSelectorProps) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['documents', apiUrl, apiKey],
-    queryFn: () => fetchDocuments(apiUrl, apiKey),
+    queryKey: ['documents', encryptedBlob],
+    queryFn: () => getDocuments(encryptedBlob),
   });
 
   if (isLoading) {

@@ -2,68 +2,30 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import UrlForm from '@/components/urlForm';
 import DocumentSelector from '@/components/documentSelector';
 import EventForm from '@/components/eventForm';
 import { Button } from '@/components/ui/button';
-import { insertBlocks, type CraftDocument } from '@/lib/craftApi';
+import { encryptSecrets, createBlocks } from '@/app/actions';
+import type { CraftDocument } from '@/lib/craftApi';
 import type { EventFormData } from '@/components/eventForm';
 
 export default function Home() {
-  const router = useRouter();
-  const [apiUrl, setApiUrl] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+  const [encryptedBlob, setEncryptedBlob] = useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<CraftDocument | null>(null);
   const [isInserting, setIsInserting] = useState(false);
   const [insertError, setInsertError] = useState<string | null>(null);
   const [insertSuccess, setInsertSuccess] = useState(false);
 
-  const insertMutation = useMutation({
-    mutationFn: async ({ documentId }: { documentId: string }) => {
-      if (!apiUrl) throw new Error('API URL not set');
-      
-      const tableMarkdown = `| Name | Mo | Tu | We | Th | Fr |
-|------|----|----|----|----|----|
-|      |    |    |    |    |    |`;
-
-      const pageBlock = {
-        type: 'text',
-        textStyle: 'page',
-        markdown: 'Schedule',
-      };
-
-      const pageResponse = await insertBlocks(apiUrl, documentId, [pageBlock], apiKey);
-      const pageId = pageResponse.items[0]?.id;
-      
-      if (!pageId) {
-        throw new Error('Failed to get page ID after creation');
-      }
-
-      const tableBlock = {
-        type: 'text',
-        markdown: tableMarkdown,
-      };
-
-      await insertBlocks(apiUrl, pageId, [tableBlock], apiKey);
-      
-      return pageResponse;
-    },
-  });
-
-  const handleUrlSubmit = (url: string, key?: string) => {
-    setApiUrl(url);
-    setApiKey(key);
-    setSelectedDocument(null);
-    setInsertSuccess(false);
-    setInsertError(null);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('craftApiUrl', url);
-      if (key) {
-        localStorage.setItem('craftApiKey', key);
-      } else {
-        localStorage.removeItem('craftApiKey');
-      }
+  const handleUrlSubmit = async (url: string, key?: string) => {
+    try {
+      const blob = await encryptSecrets({ apiUrl: url, apiKey: key });
+      setEncryptedBlob(blob);
+      setSelectedDocument(null);
+      setInsertSuccess(false);
+      setInsertError(null);
+    } catch (error) {
+      setInsertError(error instanceof Error ? error.message : 'Failed to encrypt credentials');
     }
   };
 
@@ -80,14 +42,18 @@ export default function Home() {
       description,
       location,
       timeSlots,
+      blob,
+      baseUrl,
     }: {
       documentId: string;
       eventTitle: string;
       description: string;
       location: string;
       timeSlots: Array<{ date: Date; hour: number }>;
+      blob: string;
+      baseUrl: string;
     }) => {
-      if (!apiUrl) throw new Error('API URL not set');
+      if (!blob) throw new Error('Encrypted blob not set');
 
       const { formatTableHeader } = await import('@/lib/tableParser');
 
@@ -98,7 +64,7 @@ export default function Home() {
         markdown: pageTitle,
       };
 
-      const pageResponse = await insertBlocks(apiUrl, documentId, [pageBlock], apiKey);
+      const pageResponse = await createBlocks(blob, documentId, [pageBlock]);
       const pageId = pageResponse.items[0]?.id;
 
       if (!pageId) {
@@ -122,7 +88,7 @@ export default function Home() {
       }
 
       if (blocks.length > 0) {
-        await insertBlocks(apiUrl, pageId, blocks, apiKey);
+        await createBlocks(blob, pageId, blocks);
       }
 
       const separatorBlock = {
@@ -130,7 +96,7 @@ export default function Home() {
         markdown: '---',
       };
 
-      await insertBlocks(apiUrl, pageId, [separatorBlock], apiKey);
+      await createBlocks(blob, pageId, [separatorBlock]);
 
       const tableHeaders = ['Name', ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour))];
       const tableSeparator = ['---', ...timeSlots.map(() => '---')];
@@ -147,12 +113,20 @@ export default function Home() {
         markdown: tableMarkdown,
       };
 
-      const tableResponse = await insertBlocks(apiUrl, pageId, [tableBlock], apiKey);
+      const tableResponse = await createBlocks(blob, pageId, [tableBlock]);
       const tableBlockId = tableResponse.items[0]?.id;
 
       if (!tableBlockId) {
         throw new Error('Failed to get table block ID after creation');
       }
+
+      const eventPageUrl = `${baseUrl}/event/${tableBlockId}?blob=${encodeURIComponent(blob)}`;
+      const linkBlock = {
+        type: 'text',
+        markdown: `[Vote on availability →](${eventPageUrl})`,
+      };
+
+      await createBlocks(blob, pageId, [linkBlock]);
 
       return { pageId, tableBlockId };
     },
@@ -161,7 +135,7 @@ export default function Home() {
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
 
   const handleEventSubmit = async (data: EventFormData) => {
-    if (!selectedDocument) return;
+    if (!selectedDocument || !encryptedBlob) return;
 
     setIsInserting(true);
     setInsertError(null);
@@ -170,13 +144,18 @@ export default function Home() {
 
     try {
       const selectedSlots = data.timeSlots.filter((slot) => slot.selected);
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      
       const result = await createEventMutation.mutateAsync({
         documentId: selectedDocument.id,
         eventTitle: data.title,
         description: data.description,
         location: data.location,
         timeSlots: selectedSlots,
+        blob: encryptedBlob,
+        baseUrl,
       });
+      
       setCreatedEventId(result.tableBlockId);
       setInsertSuccess(true);
     } catch (error) {
@@ -187,8 +166,7 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setApiUrl(null);
-    setApiKey(undefined);
+    setEncryptedBlob(null);
     setSelectedDocument(null);
     setInsertSuccess(false);
     setInsertError(null);
@@ -206,13 +184,12 @@ export default function Home() {
           </p>
         </div>
 
-        {!apiUrl ? (
+        {!encryptedBlob ? (
           <UrlForm onSubmit={handleUrlSubmit} />
         ) : !selectedDocument ? (
           <>
             <DocumentSelector
-              apiUrl={apiUrl}
-              apiKey={apiKey}
+              encryptedBlob={encryptedBlob}
               onSelect={handleDocumentSelect}
             />
             <div className="text-center">
@@ -231,7 +208,7 @@ export default function Home() {
               </div>
             )}
             
-            {insertSuccess && createdEventId && apiUrl && (
+            {insertSuccess && createdEventId && encryptedBlob && (
               <div className="text-sm text-green-600 bg-green-50 p-4 rounded space-y-2">
                 <div className="font-semibold">Successfully created event page!</div>
                 <div className="space-y-1">
@@ -240,7 +217,7 @@ export default function Home() {
                     <input
                       type="text"
                       readOnly
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?apiUrl=${encodeURIComponent(apiUrl)}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}`}
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`}
                       className="flex-1 px-2 py-1 text-xs border rounded bg-white font-mono"
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
@@ -248,7 +225,7 @@ export default function Home() {
                       variant="outline"
                       size="sm"
                       onClick={async () => {
-                        const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?apiUrl=${encodeURIComponent(apiUrl)}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}`;
+                        const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`;
                         await navigator.clipboard.writeText(url);
                       }}
                     >

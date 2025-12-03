@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
-import { fetchBlock, updateBlock } from '@/lib/craftApi';
+import { getBlock, modifyBlock } from '@/app/actions';
 import { parseMarkdownTable, parseTableToTimeSlots, updateTableWithVote, tableToMarkdown } from '@/lib/tableParser';
 import VotingForm from '@/components/votingForm';
 import ResultsView from '@/components/resultsView';
@@ -14,17 +14,16 @@ export default function EventView() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const blockId = params.blockId as string;
-  const apiUrl = searchParams.get('apiUrl');
-  const apiKey = searchParams.get('apiKey') || undefined;
+  const encryptedBlob = searchParams.get('blob');
   const viewMode = searchParams.get('view') || 'vote';
 
   const { data: block, isLoading, error } = useQuery({
-    queryKey: ['block', blockId, apiUrl, apiKey],
+    queryKey: ['block', blockId, encryptedBlob],
     queryFn: () => {
-      if (!apiUrl || !blockId) throw new Error('Missing API URL or block ID');
-      return fetchBlock(apiUrl, blockId, apiKey, 0);
+      if (!encryptedBlob || !blockId) throw new Error('Missing encrypted blob or block ID');
+      return getBlock(encryptedBlob, blockId, 0);
     },
-    enabled: !!apiUrl && !!blockId,
+    enabled: !!encryptedBlob && !!blockId,
   });
 
   const getMarkdownFromBlock = (block: any): string | null => {
@@ -46,20 +45,20 @@ export default function EventView() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ name, votes }: { name: string; votes: Record<number, boolean> }) => {
-      if (!apiUrl || !blockId || !table) {
+      if (!encryptedBlob || !blockId || !table) {
         throw new Error('Missing required data');
       }
 
       const updatedTable = updateTableWithVote(table, name, votes);
       const newMarkdown = tableToMarkdown(updatedTable);
       
-      await updateBlock(apiUrl, blockId, newMarkdown, apiKey);
+      await modifyBlock(encryptedBlob, blockId, newMarkdown);
       
       return { name, votes };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['block', blockId, apiUrl, apiKey] });
-      router.push(`/event/${blockId}?apiUrl=${encodeURIComponent(apiUrl || '')}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}&view=results`);
+      queryClient.invalidateQueries({ queryKey: ['block', blockId, encryptedBlob] });
+      router.push(`/event/${blockId}?blob=${encodeURIComponent(encryptedBlob || '')}&view=results`);
     },
   });
 
@@ -172,7 +171,7 @@ export default function EventView() {
                   <p className="text-sm text-muted-foreground">Want to update your vote?</p>
                   <button
                     onClick={() => {
-                      router.push(`/event/${blockId}?apiUrl=${encodeURIComponent(apiUrl || '')}${apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ''}&view=vote`);
+                      router.push(`/event/${blockId}?blob=${encodeURIComponent(encryptedBlob || '')}&view=vote`);
                     }}
                     className="text-blue-600 hover:text-blue-700 underline text-sm"
                   >
