@@ -105,9 +105,7 @@ export default function VotingForm({
                     </div>
                   </div>
                   <div
-                    className={`mt-2 font-bold text-blue-600 ${
-                      votes[index] ? "" : "invisible"
-                    }`}
+                    className={`mt-2 font-bold text-blue-600 ${votes[index] ? "" : "invisible"}`}
                   >
                     ✓ Available
                   </div>

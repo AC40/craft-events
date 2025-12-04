@@ -12,8 +12,11 @@ export interface ParsedTable {
 }
 
 export function parseMarkdownTable(markdown: string): ParsedTable | null {
-  const lines = markdown.trim().split('\n').filter((line) => line.trim());
-  
+  const lines = markdown
+    .trim()
+    .split("\n")
+    .filter((line) => line.trim());
+
   if (lines.length < 2) {
     return null;
   }
@@ -22,17 +25,17 @@ export function parseMarkdownTable(markdown: string): ParsedTable | null {
   const separatorLine = lines[1];
   const dataLines = lines.slice(2);
 
-  if (!headerLine.startsWith('|') || !headerLine.endsWith('|')) {
+  if (!headerLine.startsWith("|") || !headerLine.endsWith("|")) {
     return null;
   }
 
   const parseRow = (line: string): string[] => {
     return line
       .slice(1, -1)
-      .split('|')
+      .split("|")
       .map((cell) => {
         const trimmed = cell.trim();
-        return trimmed.replace(/<br\s*\/?>/gi, '\n');
+        return trimmed.replace(/<br\s*\/?>/gi, "\n");
       });
   };
 
@@ -45,17 +48,19 @@ export function parseMarkdownTable(markdown: string): ParsedTable | null {
 }
 
 export function formatTableHeader(date: Date, hour: number): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const hours = String(hour).padStart(2, '0');
-  const minutes = '00';
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const hours = String(hour).padStart(2, "0");
+  const minutes = "00";
   return `${day}.${month}.<br>${hours}:${minutes}`;
 }
 
-export function parseTableHeader(header: string): { date: Date; hour: number } | null {
-  const normalizedHeader = header.replace(/<br\s*\/?>/gi, '\n').trim();
-  const parts = normalizedHeader.split('\n');
-  
+export function parseTableHeader(
+  header: string
+): { date: Date; hour: number } | null {
+  const normalizedHeader = header.replace(/<br\s*\/?>/gi, "\n").trim();
+  const parts = normalizedHeader.split("\n");
+
   if (parts.length < 2) {
     return null;
   }
@@ -101,7 +106,7 @@ export function parseTableToTimeSlots(table: ParsedTable): TimeSlotData[] {
   for (let i = 1; i < table.headers.length; i++) {
     const header = table.headers[i];
     const slotInfo = parseTableHeader(header);
-    
+
     if (!slotInfo) {
       continue;
     }
@@ -111,7 +116,7 @@ export function parseTableToTimeSlots(table: ParsedTable): TimeSlotData[] {
         if (row.cells.length > i) {
           const cellValue = row.cells[i].value.trim();
           const nameCell = row.cells[0]?.value.trim();
-          if (cellValue === '✅' && nameCell) {
+          if (cellValue === "✅" && nameCell) {
             return nameCell;
           }
         }
@@ -132,17 +137,18 @@ export function parseTableToTimeSlots(table: ParsedTable): TimeSlotData[] {
 export function tableToMarkdown(table: ParsedTable): string {
   const formatCell = (value: string): string => {
     const trimmed = value.trim();
-    const escaped = trimmed.replace(/\|/g, '\\|');
-    return escaped.replace(/\n/g, '<br>');
+    const escaped = trimmed.replace(/\|/g, "\\|");
+    return escaped.replace(/\n/g, "<br>");
   };
 
-  const headerRow = `| ${table.headers.map(formatCell).join(' | ')} |`;
-  const separatorRow = `| ${table.headers.map(() => '---').join(' | ')} |`;
-  const dataRows = table.rows.map((row) => 
-    `| ${row.cells.map((cell) => formatCell(cell.value)).join(' | ')} |`
+  const headerRow = `| ${table.headers.map(formatCell).join(" | ")} |`;
+  const separatorRow = `| ${table.headers.map(() => "---").join(" | ")} |`;
+  const dataRows = table.rows.map(
+    (row) =>
+      `| ${row.cells.map((cell) => formatCell(cell.value)).join(" | ")} |`
   );
 
-  const result = [headerRow, separatorRow, ...dataRows].join('\n');
+  const result = [headerRow, separatorRow, ...dataRows].join("\n");
   return result.trim();
 }
 
@@ -152,7 +158,8 @@ export function updateTableWithVote(
   votes: Record<number, boolean>
 ): ParsedTable {
   const existingRowIndex = table.rows.findIndex(
-    (row) => row.cells[0]?.value.trim().toLowerCase() === participantName.toLowerCase()
+    (row) =>
+      row.cells[0]?.value.trim().toLowerCase() === participantName.toLowerCase()
   );
 
   const numColumns = table.headers.length;
@@ -160,7 +167,7 @@ export function updateTableWithVote(
     cells: [
       { value: participantName },
       ...Array.from({ length: numColumns - 1 }, (_, index) => ({
-        value: votes[index] === true ? '✅' : '',
+        value: votes[index] === true ? "✅" : "",
       })),
     ],
   };
@@ -173,4 +180,3 @@ export function updateTableWithVote(
     return { ...table, rows: [...table.rows, newRow] };
   }
 }
-

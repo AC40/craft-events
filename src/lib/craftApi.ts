@@ -112,9 +112,7 @@ export async function fetchBlock(
     headers["Authorization"] = `Bearer ${apiKey}`;
   }
 
-  const url = `${apiUrl}/blocks?id=${encodeURIComponent(
-    blockId
-  )}&maxDepth=${maxDepth}`;
+  const url = `${apiUrl}/blocks?id=${encodeURIComponent(blockId)}&maxDepth=${maxDepth}`;
   const response = await fetch(url, {
     method: "GET",
     headers,

@@ -1,22 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
-import UrlForm from '@/components/urlForm';
-import DocumentSelector from '@/components/documentSelector';
-import EventForm from '@/components/eventForm';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { encryptSecrets, createBlocks } from '@/app/actions';
-import { addEventToHistory, loadEventHistory, type EventHistoryEntry } from '@/lib/eventHistory';
-import type { CraftDocument } from '@/lib/craftApi';
-import type { EventFormData } from '@/components/eventForm';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import UrlForm from "@/components/urlForm";
+import DocumentSelector from "@/components/documentSelector";
+import EventForm from "@/components/eventForm";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { encryptSecrets, createBlocks } from "@/app/actions";
+import {
+  addEventToHistory,
+  loadEventHistory,
+  type EventHistoryEntry,
+} from "@/lib/eventHistory";
+import type { CraftDocument } from "@/lib/craftApi";
+import type { EventFormData } from "@/components/eventForm";
 
 export default function Home() {
   const router = useRouter();
   const [encryptedBlob, setEncryptedBlob] = useState<string | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<CraftDocument | null>(null);
+  const [selectedDocument, setSelectedDocument] =
+    useState<CraftDocument | null>(null);
   const [isInserting, setIsInserting] = useState(false);
   const [insertError, setInsertError] = useState<string | null>(null);
   const [eventHistory, setEventHistory] = useState<EventHistoryEntry[]>([]);
@@ -33,7 +38,9 @@ export default function Home() {
       setSelectedDocument(null);
       setInsertError(null);
     } catch (error) {
-      setInsertError(error instanceof Error ? error.message : 'Failed to encrypt credentials');
+      setInsertError(
+        error instanceof Error ? error.message : "Failed to encrypt credentials"
+      );
     }
   };
 
@@ -60,14 +67,14 @@ export default function Home() {
       blob: string;
       baseUrl: string;
     }) => {
-      if (!blob) throw new Error('Encrypted blob not set');
+      if (!blob) throw new Error("Encrypted blob not set");
 
-      const { formatTableHeader } = await import('@/lib/tableParser');
+      const { formatTableHeader } = await import("@/lib/tableParser");
 
       const pageTitle = `${eventTitle} – Scheduling`;
       const pageBlock = {
-        type: 'text',
-        textStyle: 'page',
+        type: "text",
+        textStyle: "page",
         markdown: pageTitle,
       };
 
@@ -75,21 +82,25 @@ export default function Home() {
       const pageId = pageResponse.items[0]?.id;
 
       if (!pageId) {
-        throw new Error('Failed to get page ID after creation');
+        throw new Error("Failed to get page ID after creation");
       }
 
-      const blocks: Array<{ type: string; markdown?: string; textStyle?: string }> = [];
+      const blocks: Array<{
+        type: string;
+        markdown?: string;
+        textStyle?: string;
+      }> = [];
 
       if (description) {
         blocks.push({
-          type: 'text',
+          type: "text",
           markdown: description,
         });
       }
 
       if (location) {
         blocks.push({
-          type: 'text',
+          type: "text",
           markdown: location,
         });
       }
@@ -99,24 +110,27 @@ export default function Home() {
       }
 
       const separatorBlock = {
-        type: 'text',
-        markdown: '---',
+        type: "text",
+        markdown: "---",
       };
 
       await createBlocks(blob, pageId, [separatorBlock]);
 
-      const tableHeaders = ['Name', ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour))];
-      const tableSeparator = ['---', ...timeSlots.map(() => '---')];
-      const organiserRow = ['Organiser', ...timeSlots.map(() => '✅')];
+      const tableHeaders = [
+        "Name",
+        ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour)),
+      ];
+      const tableSeparator = ["---", ...timeSlots.map(() => "---")];
+      const organiserRow = ["Organiser", ...timeSlots.map(() => "✅")];
 
       const tableMarkdown = [
-        `| ${tableHeaders.join(' | ')} |`,
-        `| ${tableSeparator.join(' | ')} |`,
-        `| ${organiserRow.join(' | ')} |`,
-      ].join('\n');
+        `| ${tableHeaders.join(" | ")} |`,
+        `| ${tableSeparator.join(" | ")} |`,
+        `| ${organiserRow.join(" | ")} |`,
+      ].join("\n");
 
       const tableBlock = {
-        type: 'text',
+        type: "text",
         markdown: tableMarkdown,
       };
 
@@ -124,14 +138,14 @@ export default function Home() {
       const tableBlockId = tableResponse.items[0]?.id;
 
       if (!tableBlockId) {
-        throw new Error('Failed to get table block ID after creation');
+        throw new Error("Failed to get table block ID after creation");
       }
 
       const encodedTitle = encodeURIComponent(eventTitle);
       const voteUrl = `${baseUrl}/event/${tableBlockId}?blob=${encodeURIComponent(blob)}&title=${encodedTitle}`;
       const resultsUrl = `${baseUrl}/event/${tableBlockId}/results?blob=${encodeURIComponent(blob)}&title=${encodedTitle}`;
       const linkBlock = {
-        type: 'text',
+        type: "text",
         markdown: `[Vote on availability →](${voteUrl})\n\n[View live results →](${resultsUrl})`,
       };
 
@@ -149,8 +163,9 @@ export default function Home() {
 
     try {
       const selectedSlots = data.timeSlots.filter((slot) => slot.selected);
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      
+      const baseUrl =
+        typeof window !== "undefined" ? window.location.origin : "";
+
       const result = await createEventMutation.mutateAsync({
         documentId: selectedDocument.id,
         eventTitle: data.title,
@@ -172,7 +187,9 @@ export default function Home() {
       setEventHistory(history);
       router.push(result.resultsUrl);
     } catch (error) {
-      setInsertError(error instanceof Error ? error.message : 'Failed to create event');
+      setInsertError(
+        error instanceof Error ? error.message : "Failed to create event"
+      );
     } finally {
       setIsInserting(false);
     }
@@ -188,8 +205,12 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-4xl space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Craft Events</h1>
-          <p className="text-lg text-gray-600">Connect to your Craft documents</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Craft Events
+          </h1>
+          <p className="text-lg text-gray-600">
+            Connect to your Craft documents
+          </p>
         </div>
 
         {eventHistory.length > 0 && (
@@ -198,8 +219,12 @@ export default function Home() {
               <CardTitle className="text-base font-semibold text-gray-900">
                 Previously accessed events
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setHistoryVisible((prev) => !prev)}>
-                {historyVisible ? 'Hide history' : 'Show history'}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setHistoryVisible((prev) => !prev)}
+              >
+                {historyVisible ? "Hide history" : "Show history"}
               </Button>
             </CardHeader>
             {historyVisible && (
@@ -210,17 +235,27 @@ export default function Home() {
                     className="flex flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{entry.title}</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {entry.title}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {entry.documentTitle ? `${entry.documentTitle} · ` : ''}
+                        {entry.documentTitle ? `${entry.documentTitle} · ` : ""}
                         {new Date(entry.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 sm:mt-0">
-                      <Button size="sm" variant="outline" onClick={() => router.push(entry.resultsUrl)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => router.push(entry.resultsUrl)}
+                      >
                         View results
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => router.push(entry.voteUrl)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => router.push(entry.voteUrl)}
+                      >
                         Open voting
                       </Button>
                     </div>
@@ -235,7 +270,10 @@ export default function Home() {
           <UrlForm onSubmit={handleUrlSubmit} />
         ) : !selectedDocument ? (
           <>
-            <DocumentSelector encryptedBlob={encryptedBlob} onSelect={handleDocumentSelect} />
+            <DocumentSelector
+              encryptedBlob={encryptedBlob}
+              onSelect={handleDocumentSelect}
+            />
             <div className="text-center">
               <Button variant="outline" onClick={handleReset}>
                 Use Different URL
@@ -244,7 +282,10 @@ export default function Home() {
           </>
         ) : (
           <>
-            <EventForm documentTitle={selectedDocument.title} onSubmit={handleEventSubmit} />
+            <EventForm
+              documentTitle={selectedDocument.title}
+              onSubmit={handleEventSubmit}
+            />
 
             {isInserting && (
               <div
@@ -273,4 +314,3 @@ export default function Home() {
     </div>
   );
 }
-

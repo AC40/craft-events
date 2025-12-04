@@ -1,8 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { getDocuments } from '@/app/actions';
-import type { CraftDocument } from '@/lib/craftApi';
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { getDocuments } from "@/app/actions";
+import type { CraftDocument } from "@/lib/craftApi";
 
 interface DocumentSelectorProps {
   encryptedBlob: string;
@@ -14,7 +20,7 @@ export default function DocumentSelector({
   onSelect,
 }: DocumentSelectorProps) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['documents', encryptedBlob],
+    queryKey: ["documents", encryptedBlob],
     queryFn: () => getDocuments(encryptedBlob),
   });
 
@@ -22,7 +28,9 @@ export default function DocumentSelector({
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">Loading documents...</p>
+          <p className="text-center text-muted-foreground">
+            Loading documents...
+          </p>
         </CardContent>
       </Card>
     );
@@ -33,7 +41,9 @@ export default function DocumentSelector({
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="p-6">
           <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
-            {error instanceof Error ? error.message : 'Failed to load documents'}
+            {error instanceof Error
+              ? error.message
+              : "Failed to load documents"}
           </div>
         </CardContent>
       </Card>
@@ -58,9 +68,7 @@ export default function DocumentSelector({
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Select a Document</CardTitle>
-        <CardDescription>
-          Choose a document to work with
-        </CardDescription>
+        <CardDescription>Choose a document to work with</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
@@ -79,4 +87,3 @@ export default function DocumentSelector({
     </Card>
   );
 }
-

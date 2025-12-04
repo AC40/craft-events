@@ -238,9 +238,7 @@ export default function Home() {
                         typeof window !== "undefined"
                           ? window.location.origin
                           : ""
-                      }/event/${createdEventId}?blob=${encodeURIComponent(
-                        encryptedBlob
-                      )}`}
+                      }/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`}
                       className="flex-1 px-2 py-1 font-mono text-xs bg-white rounded border"
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
@@ -252,9 +250,7 @@ export default function Home() {
                           typeof window !== "undefined"
                             ? window.location.origin
                             : ""
-                        }/event/${createdEventId}?blob=${encodeURIComponent(
-                          encryptedBlob
-                        )}`;
+                        }/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`;
                         await navigator.clipboard.writeText(url);
                       }}
                     >

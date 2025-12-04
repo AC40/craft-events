@@ -1,36 +1,42 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { normalizeApiUrl } from '@/lib/craftApi';
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { normalizeApiUrl } from "@/lib/craftApi";
 
 interface UrlFormProps {
   onSubmit: (apiUrl: string, apiKey?: string) => Promise<void>;
 }
 
 export default function UrlForm({ onSubmit }: UrlFormProps) {
-  const [url, setUrl] = useState('');
-  const [apiKey, setApiKey] = useState('');
+  const [url, setUrl] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!url.trim()) {
-      setError('Please enter a Craft doc URL');
+      setError("Please enter a Craft doc URL");
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const normalizedUrl = normalizeApiUrl(url);
       await onSubmit(normalizedUrl, apiKey.trim() || undefined);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid URL format');
+      setError(err instanceof Error ? err.message : "Invalid URL format");
     } finally {
       setIsSubmitting(false);
     }
@@ -57,7 +63,7 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
               disabled={isSubmitting}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="apiKey">API Key (optional)</Label>
             <Input
@@ -77,11 +83,10 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Connecting...' : 'Connect'}
+            {isSubmitting ? "Connecting..." : "Connect"}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
-

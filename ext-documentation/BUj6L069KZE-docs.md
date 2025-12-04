@@ -3,6 +3,7 @@
 **Version:** 1.0.0
 
 ## Overview
+
 The Craft Multi-Document API provides programmatic access to multiple Craft documents. Access documents, blocks, collections, and search across your document set with unified authentication.
 
 ## Key Concepts
@@ -12,9 +13,11 @@ The Craft Multi-Document API provides programmatic access to multiple Craft docu
 **Cross-Document Operations**: Most operations require specifying which document to work with via block IDs. The API automatically resolves which document a block belongs to.
 
 ## Recommended Usage
+
 This API is ideal for building integrations that need to work with multiple related documents, such as project documentation sets, knowledge bases, or multi-document workflows.
 
 ## Development Tips
+
 - Start with `GET /documents` to discover available documents and their IDs
 - Use the `id` parameter in `GET /blocks` with a document's ID to fetch that document's content
 - When inserting blocks, use `pageId` in the position object to specify the target document/block
@@ -22,6 +25,7 @@ This API is ideal for building integrations that need to work with multiple rela
 - Collections can span multiple documents - use `GET /collections` to discover them
 
 ## Note for AI
+
 When implementing functionality using this API, always make actual calls to these endpoints and verify the responses. Do not simulate or mock the API interactions or use hard-coded values on the client-side - use the real endpoints to ensure proper functionality and data handling.
 
 **IMPORTANT: This is a production server connected to real user data.** Only perform testing operations that can be safely rolled back:
@@ -51,6 +55,7 @@ Retrieve all documents accessible through this multi-document connection. Return
 ## Responses
 
 ### 200
+
 List of documents with their metadata
 
 **Content-Type:** `application/json`
@@ -105,6 +110,7 @@ Use `Accept` header `application/json` for structured data, `text/markdown` for 
 ## Responses
 
 ### 200
+
 Fetched block with nested children
 
 **Content-Type:** `application/json`
@@ -140,6 +146,7 @@ Fetched block with nested children
     # Overview
 
     This is the project overview document.
+
 </content>
 </page>
 ```
@@ -155,7 +162,6 @@ Insert content into documents in this multi-document connection. Content can be 
 ## Request Body
 
 **Content-Type:** `application/json`
-
 
 **Example: textBlock**
 
@@ -176,7 +182,6 @@ Insert text block into document
 }
 ```
 
-
 **Example: markdown**
 
 Insert markdown content
@@ -194,6 +199,7 @@ Insert markdown content
 ## Responses
 
 ### 200
+
 Array of inserted blocks with assigned IDs
 
 **Content-Type:** `application/json`
@@ -211,9 +217,7 @@ Array of inserted blocks with assigned IDs
       "markdown": "string",
       "indentationLevel": 0,
       "listStyle": "none",
-      "decorations": [
-        "callout"
-      ],
+      "decorations": ["callout"],
       "color": "string",
       "taskInfo": {
         "state": "todo",
@@ -230,14 +234,10 @@ Array of inserted blocks with assigned IDs
             "skipWeekends": false
           },
           "weekly": {
-            "days": [
-              "monday"
-            ]
+            "days": ["monday"]
           },
           "monthly": {
-            "days": [
-              0
-            ],
+            "days": [0],
             "dynamicDays": [
               {
                 "selector": "first",
@@ -247,12 +247,8 @@ Array of inserted blocks with assigned IDs
             "skipWeekends": false
           },
           "yearly": {
-            "months": [
-              0
-            ],
-            "days": [
-              0
-            ],
+            "months": [0],
+            "days": [0],
             "dynamicDays": [
               {
                 "selector": "first",
@@ -299,17 +295,14 @@ Delete content from documents in this multi-document connection. Removes specifi
 
 ```json
 {
-  "blockIds": [
-    "7",
-    "9",
-    "12"
-  ]
+  "blockIds": ["7", "9", "12"]
 }
 ```
 
 ## Responses
 
 ### 200
+
 Array of deleted block IDs
 
 **Content-Type:** `application/json`
@@ -350,6 +343,7 @@ Update content across documents in this multi-document connection. For text bloc
 ## Responses
 
 ### 200
+
 Array of updated blocks
 
 **Content-Type:** `application/json`
@@ -367,9 +361,7 @@ Array of updated blocks
       "markdown": "string",
       "indentationLevel": 0,
       "listStyle": "none",
-      "decorations": [
-        "callout"
-      ],
+      "decorations": ["callout"],
       "color": "string",
       "taskInfo": {
         "state": "todo",
@@ -386,14 +378,10 @@ Array of updated blocks
             "skipWeekends": false
           },
           "weekly": {
-            "days": [
-              "monday"
-            ]
+            "days": ["monday"]
           },
           "monthly": {
-            "days": [
-              0
-            ],
+            "days": [0],
             "dynamicDays": [
               {
                 "selector": "first",
@@ -403,12 +391,8 @@ Array of updated blocks
             "skipWeekends": false
           },
           "yearly": {
-            "months": [
-              0
-            ],
-            "days": [
-              0
-            ],
+            "months": [0],
+            "days": [0],
             "dynamicDays": [
               {
                 "selector": "first",
@@ -455,10 +439,7 @@ Move blocks to reorder them or move them between documents. Returns the moved bl
 
 ```json
 {
-  "blockIds": [
-    "9",
-    "10"
-  ],
+  "blockIds": ["9", "10"],
   "position": {
     "position": "end",
     "pageId": "doc-456"
@@ -469,6 +450,7 @@ Move blocks to reorder them or move them between documents. Returns the moved bl
 ## Responses
 
 ### 200
+
 Array of moved block IDs
 
 **Content-Type:** `application/json`
@@ -507,6 +489,7 @@ Search content in one single Craft document. This is a secondary search tool tha
 ## Responses
 
 ### 200
+
 Array of search matches with structured context
 
 **Content-Type:** `application/json`
@@ -555,6 +538,7 @@ Search content across multiple documents using relevance-based ranking. This end
 - Returns exposedDocumentId for each result
 
 **Example Use Cases:**
+
 - Find all mentions of a topic across project documents
 - Search for specific content excluding certain documents
 - Locate references across a set of related documents
@@ -571,10 +555,10 @@ Search content across multiple documents using relevance-based ranking. This end
 ## Responses
 
 ### 200
+
 Array of search matches across documents with match highlighting
 
 **Content-Type:** `application/json`
-
 
 **Example: basicSearch**
 
@@ -628,6 +612,7 @@ List all collections across documents in this multi-document connection
 ## Responses
 
 ### 200
+
 List of collections with metadata
 
 **Content-Type:** `application/json`
@@ -666,6 +651,7 @@ List of collections with metadata
 Get the schema for a collection by its ID.
 
 **Format Options** (via `format` query parameter):
+
 - `json-schema-items` (default): Returns JSON Schema for validating collection items (use with add/update endpoints)
 - `schema`: Returns the collection's schema structure (name, properties, types)
 
@@ -681,10 +667,10 @@ Use the collection ID from the `/collections` endpoint.
 ## Responses
 
 ### 200
+
 Collection schema in requested format
 
 **Content-Type:** `application/json`
-
 
 **Example: jsonSchemaFormat**
 
@@ -706,15 +692,11 @@ JSON Schema format (format=json-schema-items, default)
             "type": "object"
           }
         },
-        "required": [
-          "title"
-        ]
+        "required": ["title"]
       }
     }
   },
-  "required": [
-    "items"
-  ]
+  "required": ["items"]
 }
 ```
 
@@ -767,6 +749,7 @@ Retrieve all items from a specific collection. Use the collection ID from the `/
 ## Responses
 
 ### 200
+
 Collection items retrieved successfully
 
 **Content-Type:** `application/json`
@@ -813,6 +796,7 @@ Add new items to a specific collection.
 ## Responses
 
 ### 200
+
 Items added successfully
 
 **Content-Type:** `application/json`
@@ -847,16 +831,14 @@ Delete items from a specific collection by their IDs.
 
 ```json
 {
-  "idsToDelete": [
-    "1",
-    "2"
-  ]
+  "idsToDelete": ["1", "2"]
 }
 ```
 
 ## Responses
 
 ### 200
+
 Items deleted successfully
 
 **Content-Type:** `application/json`
@@ -903,6 +885,7 @@ Update existing items in a specific collection.
 ## Responses
 
 ### 200
+
 Items updated successfully
 
 **Content-Type:** `application/json`

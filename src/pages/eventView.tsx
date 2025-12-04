@@ -223,9 +223,7 @@ export default function EventView() {
                   <button
                     onClick={() => {
                       router.push(
-                        `/event/${blockId}?apiUrl=${encodeURIComponent(
-                          apiUrl || ""
-                        )}${
+                        `/event/${blockId}?apiUrl=${encodeURIComponent(apiUrl || "")}${
                           apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : ""
                         }&view=vote`
                       );

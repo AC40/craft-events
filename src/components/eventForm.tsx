@@ -93,14 +93,17 @@ export default function EventForm({ documentTitle, onSubmit }: EventFormProps) {
     });
   };
 
-  const groupedSlots = timeSlots.reduce((acc, slot, index) => {
-    const dateKey = slot.date.toDateString();
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push({ ...slot, index });
-    return acc;
-  }, {} as Record<string, Array<TimeSlot & { index: number }>>);
+  const groupedSlots = timeSlots.reduce(
+    (acc, slot, index) => {
+      const dateKey = slot.date.toDateString();
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push({ ...slot, index });
+      return acc;
+    },
+    {} as Record<string, Array<TimeSlot & { index: number }>>
+  );
 
   const dates = Object.keys(groupedSlots).sort();
 
