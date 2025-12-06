@@ -9,22 +9,26 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import ConfirmDialog from "./confirmDialog";
 import type { ParsedTable } from "@/lib/tableParser";
 
 interface VotingFormProps {
   table: ParsedTable;
   timeSlots: Array<{ date: Date; hour: number }>;
   onSubmit: (name: string, votes: Record<number, boolean>) => Promise<void>;
+  onBack?: () => void;
 }
 
 export default function VotingForm({
   table,
   timeSlots,
   onSubmit,
+  onBack,
 }: VotingFormProps) {
   const [name, setName] = useState("");
   const [votes, setVotes] = useState<Record<number, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAbortDialog, setShowAbortDialog] = useState(false);
 
   const toggleVote = (slotIndex: number) => {
     setVotes((prev) => ({
@@ -45,6 +49,25 @@ export default function VotingForm({
     }
   };
 
+  const hasUnsavedChanges = () => {
+    return name.trim() !== "" || Object.keys(votes).length > 0;
+  };
+
+  const handleBackClick = () => {
+    if (hasUnsavedChanges()) {
+      setShowAbortDialog(true);
+    } else {
+      onBack?.();
+    }
+  };
+
+  const handleAbortConfirm = () => {
+    setShowAbortDialog(false);
+    setName("");
+    setVotes({});
+    onBack?.();
+  };
+
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -60,15 +83,23 @@ export default function VotingForm({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Vote on Availability</CardTitle>
-        <CardDescription>
-          Select the time slots you're available for
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Vote on Availability</CardTitle>
+          <CardDescription>
+            Select the time slots you're available for
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {onBack && (
+            <div className="mb-4">
+              <Button variant="ghost" onClick={handleBackClick}>
+                ← Back
+              </Button>
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Your Name</Label>
             <Input
@@ -124,5 +155,15 @@ export default function VotingForm({
         </form>
       </CardContent>
     </Card>
+    <ConfirmDialog
+      open={showAbortDialog}
+      title="Discard unsaved votes?"
+      description="You have unsaved votes. Are you sure you want to go back? Your selections will be lost."
+      confirmLabel="Discard"
+      cancelLabel="Cancel"
+      onConfirm={handleAbortConfirm}
+      onCancel={() => setShowAbortDialog(false)}
+    />
+  </>
   );
 }

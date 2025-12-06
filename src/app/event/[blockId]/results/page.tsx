@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ResultsView from "@/components/resultsView";
@@ -153,6 +154,13 @@ export default function EventResultsPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="space-y-1">
+          <div className="mb-2">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                ← Back to home
+              </Button>
+            </Link>
+          </div>
           <p className="text-sm text-muted-foreground">Event results</p>
           <h1 className="text-3xl font-semibold text-gray-900">{eventTitle}</h1>
         </div>

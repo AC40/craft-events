@@ -13,11 +13,13 @@ import type { CraftDocument } from "@/lib/craftApi";
 interface DocumentSelectorProps {
   encryptedBlob: string;
   onSelect: (document: CraftDocument) => void;
+  onBack?: () => void;
 }
 
 export default function DocumentSelector({
   encryptedBlob,
   onSelect,
+  onBack,
 }: DocumentSelectorProps) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["documents", encryptedBlob],
@@ -70,7 +72,7 @@ export default function DocumentSelector({
         <CardTitle>Select a Document</CardTitle>
         <CardDescription>Choose a document to work with</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           {documents.map((doc) => (
             <Button
@@ -83,6 +85,13 @@ export default function DocumentSelector({
             </Button>
           ))}
         </div>
+        {onBack && (
+          <div className="pt-2 border-t">
+            <Button variant="ghost" className="w-full" onClick={onBack}>
+              ← Back
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

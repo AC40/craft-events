@@ -66,3 +66,4 @@ export function addEventToHistory(
   writeCookie(HISTORY_COOKIE_NAME, encodeURIComponent(JSON.stringify(updated)));
   return updated;
 }
+
