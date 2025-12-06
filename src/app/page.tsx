@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import UrlForm from "@/components/urlForm";
 import DocumentSelector from "@/components/documentSelector";
@@ -212,9 +213,14 @@ export default function Home() {
           <h1 className="mb-2 text-4xl font-bold text-foreground">
             Craft Events
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground mb-4">
             Connect to your Craft documents
           </p>
+          <Link href="/how-it-works">
+            <Button variant="outline" size="sm" className="gap-2">
+              Learn how it works
+            </Button>
+          </Link>
         </div>
 
         {!encryptedBlob ? (
