@@ -33,13 +33,13 @@ export default function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="flex fixed inset-0 z-50 justify-center items-center p-4 bg-black/50">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardFooter className="flex justify-end gap-2">
+        <CardFooter className="flex gap-2 justify-end">
           <Button variant="outline" onClick={onCancel}>
             {cancelLabel}
           </Button>
@@ -51,7 +51,3 @@ export default function ConfirmDialog({
     </div>
   );
 }
-
-
-
-
