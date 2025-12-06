@@ -32,7 +32,7 @@ interface EventFormProps {
 
 const generateTimeSlots = (startDate: Date, days: number): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   for (let day = 0; day < days; day++) {
     const date = new Date(startDate);
@@ -72,12 +72,75 @@ export default function EventForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.toISOString().split("T")[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const nextWeek = new Date();
+    nextWeek.setHours(0, 0, 0, 0);
+    nextWeek.setDate(nextWeek.getDate() + 6);
+    return nextWeek.toISOString().split("T")[0];
+  });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return generateTimeSlots(today, 7);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 6);
+    const daysDiff =
+      Math.ceil(
+        (nextWeek.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+    return generateTimeSlots(today, daysDiff);
   });
   const [showAbortDialog, setShowAbortDialog] = useState(false);
+
+  const updateTimeSlots = (start: string, end: string) => {
+    const startDateObj = new Date(start);
+    startDateObj.setHours(0, 0, 0, 0);
+    const endDateObj = new Date(end);
+    endDateObj.setHours(0, 0, 0, 0);
+
+    if (endDateObj < startDateObj) {
+      return;
+    }
+
+    const daysDiff =
+      Math.ceil(
+        (endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const newSlots = generateTimeSlots(startDateObj, daysDiff);
+
+    setTimeSlots((prev) => {
+      const selectedSlots = new Map<string, boolean>();
+      prev.forEach((slot) => {
+        const key = `${slot.date.toDateString()}-${slot.hour}`;
+        selectedSlots.set(key, slot.selected);
+      });
+
+      return newSlots.map((slot) => {
+        const key = `${slot.date.toDateString()}-${slot.hour}`;
+        return {
+          ...slot,
+          selected: selectedSlots.get(key) || false,
+        };
+      });
+    });
+  };
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStart = e.target.value;
+    setStartDate(newStart);
+    updateTimeSlots(newStart, endDate);
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEnd = e.target.value;
+    setEndDate(newEnd);
+    updateTimeSlots(startDate, newEnd);
+  };
 
   const toggleTimeSlot = (index: number) => {
     setTimeSlots((prev) => {
@@ -184,68 +247,102 @@ export default function EventForm({
             </div>
 
             <div className="space-y-4">
-              <Label>Select Available Time Slots</Label>
-              <div className="overflow-x-auto p-4 bg-white rounded-lg border">
-                <div className="min-w-max">
-                  <div
-                    className="grid gap-0"
-                    style={{
-                      gridTemplateColumns: `120px repeat(${dates.length}, minmax(100px, 1fr))`,
-                    }}
-                  >
-                    <div className="p-2 text-sm font-semibold text-muted-foreground">
-                      Time
-                    </div>
-                    {dates.map((dateKey) => {
-                      const date = new Date(dateKey);
-                      return (
-                        <div
-                          key={dateKey}
-                          className="p-2 text-sm font-semibold text-center border-b"
-                        >
-                          {formatDate(date)}
-                        </div>
-                      );
-                    })}
+              <div className="space-y-4">
+                <Label>Date Range</Label>
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate" className="text-sm">
+                      Start Date
+                    </Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={startDate}
+                      onChange={handleStartDateChange}
+                      min={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate" className="text-sm">
+                      End Date
+                    </Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={endDate}
+                      onChange={handleEndDateChange}
+                      min={startDate}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Label>Select Available Time Slots</Label>
+                <div className="overflow-auto p-4 bg-card rounded-lg border max-h-[600px]">
+                  <div className="min-w-max">
+                    <div
+                      className="grid gap-0"
+                      style={{
+                        gridTemplateColumns: `120px repeat(${dates.length}, minmax(100px, 1fr))`,
+                      }}
+                    >
+                      <div className="p-2 text-sm font-semibold text-muted-foreground sticky left-0 top-0 z-30 bg-card border-r border-b">
+                        Time
+                      </div>
+                      {dates.map((dateKey) => {
+                        const date = new Date(dateKey);
+                        return (
+                          <div
+                            key={dateKey}
+                            className="p-2 text-sm font-semibold text-center border-b sticky top-0 z-20 bg-card"
+                          >
+                            {formatDate(date)}
+                          </div>
+                        );
+                      })}
 
-                    {[9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((hour) => (
-                      <div key={hour} className="contents">
-                        <div className="p-2 text-sm border-r text-muted-foreground">
-                          {formatTime(hour)}
-                        </div>
-                        {dates.map((dateKey) => {
-                          const slot = groupedSlots[dateKey].find(
-                            (s) => s.hour === hour
-                          );
-                          if (!slot)
-                            return (
-                              <div key={`${dateKey}-${hour}`} className="p-2" />
+                      {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                        <div key={hour} className="contents">
+                          <div className="p-2 text-sm border-r text-muted-foreground sticky left-0 z-10 bg-card">
+                            {formatTime(hour)}
+                          </div>
+                          {dates.map((dateKey) => {
+                            const slot = groupedSlots[dateKey].find(
+                              (s) => s.hour === hour
                             );
+                            if (!slot)
+                              return (
+                                <div
+                                  key={`${dateKey}-${hour}`}
+                                  className="p-2"
+                                />
+                              );
 
-                          return (
-                            <button
-                              key={`${dateKey}-${hour}`}
-                              type="button"
-                              onClick={() => toggleTimeSlot(slot.index)}
-                              className={`
+                            return (
+                              <button
+                                key={`${dateKey}-${hour}`}
+                                type="button"
+                                onClick={() => toggleTimeSlot(slot.index)}
+                                className={`
                               p-2 m-1 rounded border transition-colors min-h-[40px] flex items-center justify-center
                               ${
                                 slot.selected
-                                  ? "bg-blue-500 text-white border-blue-600 hover:bg-blue-600"
-                                  : "bg-gray-50 hover:bg-gray-100 border-gray-200"
+                                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
+                                  : "bg-secondary hover:bg-secondary/80 border-border"
                               }
                             `}
-                            >
-                              <span
-                                className={slot.selected ? "" : "invisible"}
                               >
-                                ✓
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ))}
+                                <span
+                                  className={slot.selected ? "" : "invisible"}
+                                >
+                                  ✓
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

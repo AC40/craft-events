@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl px-8 py-12">
         <div className="mb-8">
           <Link href="/">
@@ -14,15 +14,15 @@ export default function PrivacyPage() {
           </Link>
         </div>
 
-        <Card className="bg-white">
+        <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+            <CardTitle className="text-2xl font-bold text-foreground">
               Privacy Policy
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6 text-gray-700">
+          <CardContent className="space-y-6 text-foreground">
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
                 Data Protection
               </h2>
               <p className="text-sm">
@@ -34,12 +34,12 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
                 Data Processing
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-1">
+                  <h3 className="font-medium text-foreground mb-1">
                     API Credentials
                   </h3>
                   <p>
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-1">
+                  <h3 className="font-medium text-foreground mb-1">
                     Local Storage
                   </h3>
                   <p>
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-1">
+                  <h3 className="font-medium text-foreground mb-1">
                     Server-Side Processing
                   </h3>
                   <p>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
                 Contact
               </h2>
               <p className="text-sm">

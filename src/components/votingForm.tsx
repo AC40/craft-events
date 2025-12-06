@@ -124,8 +124,8 @@ export default function VotingForm({
                     p-4 rounded-lg border-2 transition-all text-left min-h-[100px] flex flex-col justify-between
                     ${
                       votes[index]
-                        ? "bg-blue-50 border-blue-500"
-                        : "bg-white border-gray-200 hover:border-gray-300"
+                        ? "bg-accent/20 border-accent"
+                        : "bg-card border-border hover:border-accent/50"
                     }
                   `}
                 >
@@ -136,7 +136,7 @@ export default function VotingForm({
                     </div>
                   </div>
                   <div
-                    className={`mt-2 font-bold text-blue-600 ${votes[index] ? "" : "invisible"}`}
+                    className={`mt-2 font-bold text-accent ${votes[index] ? "" : "invisible"}`}
                   >
                     ✓ Available
                   </div>

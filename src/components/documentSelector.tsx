@@ -42,7 +42,7 @@ export default function DocumentSelector({
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="p-6">
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+          <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
             {error instanceof Error
               ? error.message
               : "Failed to load documents"}

@@ -1,0 +1,322 @@
+/*
+  aaronrichter.tech visual language
+  ---------------------------------
+  Drop this stylesheet into any project to inherit the same color system,
+  typography, and surface treatments used across aaronrichter.tech.
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap");
+
+:root {
+  /* DESIGN TOKENS */
+  --ar-theme-hue: 200;
+  --ar-color-primary: hsl(var(--ar-theme-hue) 20% 8%);
+  --ar-color-primary-foreground: hsl(var(--ar-theme-hue) 100% 92%);
+  --ar-color-secondary: hsl(var(--ar-theme-hue) 40% 12%);
+  --ar-color-accent: hsl(var(--ar-theme-hue) 100% 50%);
+  --ar-color-edge: hsl(var(--ar-theme-hue) 30% 18%);
+  --ar-font-family: "Rajdhani", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --ar-radius-surface: 0.4rem;
+  --ar-duration-normal: 200ms;
+  --ar-border: 1px solid var(--ar-color-edge);
+  --ar-card-gradient: linear-gradient(
+    180deg,
+    var(--ar-color-secondary),
+    color-mix(in srgb, var(--ar-color-secondary) 60%, transparent)
+  );
+  --ar-hero-gradient: radial-gradient(
+    circle at 50% 10%,
+    color-mix(in srgb, var(--ar-color-accent) 18%, transparent) 0%,
+    transparent 65%
+  );
+  --ar-about-gradient: radial-gradient(
+    circle at 50% 90%,
+    color-mix(in srgb, var(--ar-color-accent) 18%, transparent) 0%,
+    transparent 70%
+  );
+  --ar-shadow-soft: 0 20px 60px
+    color-mix(in srgb, var(--ar-color-primary) 70%, transparent);
+}
+
+/* Provide aliases so existing Tailwind token names keep working */
+:root {
+  --color-primary: var(--ar-color-primary);
+  --color-primary-foreground: var(--ar-color-primary-foreground);
+  --color-secondary: var(--ar-color-secondary);
+  --color-accent: var(--ar-color-accent);
+  --color-edge: var(--ar-color-edge);
+  --font-primary: var(--ar-font-family);
+  --radius-interactive: var(--ar-radius-surface);
+  --duration-interactive: var(--ar-duration-normal);
+}
+
+/* HSL values for shadcn/ui compatibility (without hsl() wrapper) */
+:root {
+  --ar-hsl-primary: var(--ar-theme-hue) 20% 8%;
+  --ar-hsl-primary-foreground: var(--ar-theme-hue) 100% 92%;
+  --ar-hsl-secondary: var(--ar-theme-hue) 40% 12%;
+  --ar-hsl-accent: var(--ar-theme-hue) 100% 50%;
+  --ar-hsl-edge: var(--ar-theme-hue) 30% 18%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--ar-color-primary);
+  color: var(--ar-color-primary-foreground);
+  font-family: var(--ar-font-family);
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.55;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--ar-color-primary);
+  color: inherit;
+  font-family: inherit;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: filter var(--ar-duration-normal) ease,
+    color var(--ar-duration-normal) ease;
+}
+
+a:hover,
+button:hover {
+  filter: brightness(1.12);
+}
+
+.text-link,
+.ar-link--accent {
+  color: var(--ar-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+
+/* Section shell used throughout the site */
+.ar-section {
+  border: 1px solid var(--ar-color-edge);
+  background-color: color-mix(in srgb, var(--ar-color-primary) 92%, black 8%);
+  width: 100%;
+}
+
+.ar-section__inner {
+  max-width: 72rem;
+  margin-inline: auto;
+  border-inline: 1px solid var(--ar-color-edge);
+  padding: clamp(1.25rem, 4vw, 3rem);
+}
+
+/* Base surface */
+.ar-surface {
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  background-color: var(--ar-color-secondary);
+  color: var(--ar-color-primary-foreground);
+}
+
+/* Card layout used for post previews */
+.ar-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-height: 8rem;
+  padding: 0.85rem;
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  background: var(--ar-card-gradient);
+  transition: border-color var(--ar-duration-normal) ease,
+    transform var(--ar-duration-normal) ease;
+}
+
+.ar-card:hover {
+  border-color: var(--ar-color-accent);
+  transform: translateY(-2px);
+}
+
+.ar-card__meta {
+  font-size: 0.85rem;
+  color: color-mix(
+    in srgb,
+    var(--ar-color-primary-foreground) 75%,
+    transparent
+  );
+}
+
+.ar-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--ar-color-accent);
+  font-weight: 700;
+}
+
+/* Tag buttons from the hero */
+.ar-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--ar-radius-surface);
+  border: 1px solid var(--ar-color-accent);
+  color: var(--ar-color-accent);
+  background: transparent;
+  font-weight: 600;
+  transition: background-color var(--ar-duration-normal) ease,
+    color var(--ar-duration-normal) ease, opacity var(--ar-duration-normal) ease;
+}
+
+.ar-tag:hover,
+.ar-tag[aria-pressed="true"] {
+  background-color: var(--ar-color-accent);
+  color: var(--ar-color-primary);
+}
+
+/* Filter pills (active filters beneath the hero) */
+.ar-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--ar-radius-surface);
+  border: 1px solid var(--ar-color-primary-foreground);
+  background-color: var(--ar-color-primary);
+  color: var(--ar-color-primary-foreground);
+  font-weight: 600;
+  transition: transform var(--ar-duration-normal) ease,
+    opacity var(--ar-duration-normal) ease;
+}
+
+.ar-filter-pill:hover {
+  transform: translateY(-0.15rem) rotate(-2deg);
+  opacity: 0.8;
+}
+
+/* Cosmetic label text */
+.ar-cosmetic-text {
+  display: inline-block;
+  padding-inline: 0.35rem;
+  color: var(--ar-color-edge);
+  font-size: 1rem;
+  letter-spacing: 0.3em;
+  font-weight: 600;
+}
+
+.ar-cosmetic-text--vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Gradient backgrounds from hero/about sections */
+.ar-bg-hero {
+  background-image: var(--ar-hero-gradient);
+}
+
+.ar-bg-about {
+  background-image: var(--ar-about-gradient);
+}
+
+/* Navigation drawer */
+.ar-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  background-color: color-mix(
+    in srgb,
+    var(--ar-color-primary) 80%,
+    transparent
+  );
+  backdrop-filter: blur(8px);
+  z-index: 40;
+}
+
+.ar-menu-panel {
+  width: min(20rem, 75vw);
+  margin-left: auto;
+  height: 100vh;
+  border-inline-start: 1px solid var(--ar-color-accent);
+  background-color: color-mix(
+    in srgb,
+    var(--ar-color-primary) 95%,
+    transparent
+  );
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: right;
+  font-size: 1.4rem;
+}
+
+.ar-menu-panel a {
+  color: var(--ar-color-primary-foreground);
+}
+
+/* Accent photo frame */
+.ar-photo-frame {
+  display: inline-flex;
+  padding: 0.35rem;
+  border-radius: var(--ar-radius-surface);
+  background-color: var(--ar-color-accent);
+  box-shadow: var(--ar-shadow-soft);
+}
+
+.ar-photo-frame img {
+  border-radius: var(--ar-radius-surface);
+  transform: rotate(-6deg) scale(1.05);
+  transition: transform var(--ar-duration-normal) ease;
+}
+
+.ar-photo-frame:hover img {
+  transform: rotate(0deg) scale(1.02);
+}
+
+/* Utility helpers that mirror the class names used in the Astro project */
+.rounded-interactive {
+  border-radius: var(--ar-radius-surface);
+}
+
+.text-edge {
+  color: var(--ar-color-edge);
+}
+
+.text-accent {
+  color: var(--ar-color-accent);
+}
+
+.bg-primary {
+  background-color: var(--ar-color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--ar-color-secondary);
+}
+
+.bg-accent {
+  background-color: var(--ar-color-accent);
+  color: var(--ar-color-primary);
+}
+
+.border-edge {
+  border-color: var(--ar-color-edge);
+}
+
+.border-accent {
+  border-color: var(--ar-color-accent);
+}

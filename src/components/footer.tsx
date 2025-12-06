@@ -4,22 +4,28 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-200 bg-white py-8 mt-auto">
-      <div className="mx-auto max-w-4xl px-8">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-sm text-gray-600">
+    <footer className="py-8 mt-auto border-t border-border bg-card">
+      <div className="px-8 mx-auto max-w-4xl">
+        <div className="flex flex-col gap-4 justify-between items-center sm:flex-row">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} Craft Events. All rights reserved.
           </p>
           <nav className="flex gap-6">
             <Link
+              href="/how-it-works"
+              className="text-sm transition-colors text-muted-foreground hover:text-accent"
+            >
+              How it works
+            </Link>
+            <Link
               href="/impress"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm transition-colors text-muted-foreground hover:text-accent"
             >
               Impress
             </Link>
             <Link
               href="/privacy"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm transition-colors text-muted-foreground hover:text-accent"
             >
               Privacy Policy
             </Link>
@@ -29,4 +35,3 @@ export default function Footer() {
     </footer>
   );
 }
-

@@ -77,7 +77,7 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
           </div>
 
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+            <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
               {error}
             </div>
           )}

@@ -206,13 +206,13 @@ export default function Home() {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50">
+    <div className="p-8 min-h-screen bg-background">
       <div className="mx-auto space-y-8 max-w-4xl">
         <div className="text-center">
-          <h1 className="mb-2 text-4xl font-bold text-gray-900">
+          <h1 className="mb-2 text-4xl font-bold text-foreground">
             Craft Events
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-muted-foreground">
             Connect to your Craft documents
           </p>
         </div>
@@ -221,9 +221,9 @@ export default function Home() {
           <>
             <UrlForm onSubmit={handleUrlSubmit} />
             {eventHistory.length > 0 && (
-              <Card className="bg-white border-blue-100">
+              <Card>
                 <CardHeader className="flex gap-4 justify-between items-center">
-                  <CardTitle className="text-base font-semibold text-gray-900">
+                  <CardTitle className="text-base font-semibold">
                     Previously accessed events
                   </CardTitle>
                   <Button
@@ -239,10 +239,13 @@ export default function Home() {
                     {eventHistory.map((entry) => (
                       <div
                         key={entry.blockId}
-                        className="flex flex-col p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+                        className="flex flex-col p-4 rounded-lg border border-border hover:border-accent transition-all sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+                        style={{
+                          background: "var(--ar-card-gradient)",
+                        }}
                       >
                         <div>
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-sm font-semibold text-foreground">
                             {entry.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -297,15 +300,15 @@ export default function Home() {
             {isInserting && (
               <div
                 aria-live="polite"
-                className="flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded border border-blue-200"
+                className="flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium rounded border text-accent-foreground bg-accent border-accent"
               >
-                <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+                <span className="w-2 h-2 rounded-full animate-pulse bg-accent-foreground" />
                 Creating a new event page...
               </div>
             )}
 
             {insertError && (
-              <div className="p-3 text-sm text-center text-red-600 bg-red-50 rounded">
+              <div className="p-3 text-sm text-center rounded border text-destructive-foreground bg-destructive/90 border-destructive/50">
                 {insertError}
               </div>
             )}

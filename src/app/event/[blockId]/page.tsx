@@ -88,7 +88,7 @@ export default function EventView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
@@ -104,11 +104,11 @@ export default function EventView() {
 
   if (error || !block) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+              <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
                 {error instanceof Error
                   ? error.message
                   : "Failed to load event"}
@@ -127,7 +127,7 @@ export default function EventView() {
 
   if (!table) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
@@ -137,7 +137,7 @@ export default function EventView() {
               {markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p className="mb-2">Markdown found:</p>
-                  <pre className="bg-gray-100 p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                  <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
                     {markdown}
                   </pre>
                 </div>
@@ -145,7 +145,7 @@ export default function EventView() {
               {!markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p>Block structure:</p>
-                  <pre className="bg-gray-100 p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                  <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
                     {JSON.stringify(block, null, 2)}
                   </pre>
                 </div>
@@ -159,7 +159,7 @@ export default function EventView() {
 
   if (timeSlots.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
@@ -168,17 +168,17 @@ export default function EventView() {
               </p>
               <div className="text-xs text-muted-foreground">
                 <p className="mb-2">Table headers:</p>
-                <pre className="bg-gray-100 p-2 rounded overflow-auto">
+                <pre className="bg-secondary p-2 rounded overflow-auto">
                   {JSON.stringify(table.headers, null, 2)}
                 </pre>
                 <p className="mb-2 mt-4">Table rows:</p>
-                <pre className="bg-gray-100 p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
                   {JSON.stringify(table.rows, null, 2)}
                 </pre>
                 {markdown && (
                   <>
                     <p className="mb-2 mt-4">Raw markdown:</p>
-                    <pre className="bg-gray-100 p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                    <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
                       {markdown}
                     </pre>
                   </>
@@ -192,7 +192,7 @@ export default function EventView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="space-y-1">
           <div className="mb-2">
@@ -203,7 +203,7 @@ export default function EventView() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">Event polling</p>
-          <h1 className="text-3xl font-semibold text-gray-900">{eventTitle}</h1>
+          <h1 className="text-3xl font-semibold text-foreground">{eventTitle}</h1>
         </div>
 
         <VotingForm

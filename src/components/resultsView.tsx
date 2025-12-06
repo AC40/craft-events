@@ -67,7 +67,7 @@ export default function ResultsView({ table, timeSlots }: ResultsViewProps) {
                     <div className="mb-1 text-xs text-muted-foreground">
                       {formatTime(slot.hour)}
                     </div>
-                    <div className="text-xs font-medium text-blue-600">
+                    <div className="text-xs font-medium text-accent">
                       👥 {getParticipantCount(index)} available
                     </div>
                   </div>
@@ -78,13 +78,13 @@ export default function ResultsView({ table, timeSlots }: ResultsViewProps) {
                 {table.rows.map((row, rowIndex) => (
                   <div
                     key={rowIndex}
-                    className="grid gap-2 items-center py-3 border-b hover:bg-gray-50"
+                    className="grid gap-2 items-center py-3 border-b hover:bg-secondary"
                     style={{
                       gridTemplateColumns: `200px repeat(${timeSlots.length}, minmax(150px, 1fr))`,
                     }}
                   >
                     <div className="flex gap-2 items-center p-2 font-medium">
-                      <div className="flex justify-center items-center w-8 h-8 text-sm font-semibold text-blue-700 bg-blue-100 rounded-full">
+                      <div className="flex justify-center items-center w-8 h-8 text-sm font-semibold text-accent-foreground bg-accent rounded-full">
                         {row.cells[0]?.value.charAt(0).toUpperCase() || "?"}
                       </div>
                       <span>{row.cells[0]?.value || ""}</span>

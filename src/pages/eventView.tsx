@@ -99,7 +99,7 @@ export default function EventView() {
 
   if (isLoading) {
     return (
-      <div className="p-8 min-h-screen bg-gray-50">
+      <div className="p-8 min-h-screen bg-background">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
@@ -115,11 +115,11 @@ export default function EventView() {
 
   if (error || !block) {
     return (
-      <div className="p-8 min-h-screen bg-gray-50">
+      <div className="p-8 min-h-screen bg-background">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
-              <div className="p-3 text-sm text-red-600 bg-red-50 rounded">
+              <div className="p-3 text-sm text-destructive-foreground bg-destructive/20 rounded">
                 {error instanceof Error
                   ? error.message
                   : "Failed to load event"}
@@ -138,7 +138,7 @@ export default function EventView() {
 
   if (!table) {
     return (
-      <div className="p-8 min-h-screen bg-gray-50">
+      <div className="p-8 min-h-screen bg-background">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
@@ -148,7 +148,7 @@ export default function EventView() {
               {markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p className="mb-2">Markdown found:</p>
-                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-gray-100 rounded">
+                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-secondary rounded">
                     {markdown}
                   </pre>
                 </div>
@@ -156,7 +156,7 @@ export default function EventView() {
               {!markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p>Block structure:</p>
-                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-gray-100 rounded">
+                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-secondary rounded">
                     {JSON.stringify(block, null, 2)}
                   </pre>
                 </div>
@@ -170,7 +170,7 @@ export default function EventView() {
 
   if (timeSlots.length === 0) {
     return (
-      <div className="p-8 min-h-screen bg-gray-50">
+      <div className="p-8 min-h-screen bg-background">
         <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
@@ -179,17 +179,17 @@ export default function EventView() {
               </p>
               <div className="text-xs text-muted-foreground">
                 <p className="mb-2">Table headers:</p>
-                <pre className="overflow-auto p-2 bg-gray-100 rounded">
+                <pre className="overflow-auto p-2 bg-secondary rounded">
                   {JSON.stringify(table.headers, null, 2)}
                 </pre>
                 <p className="mt-4 mb-2">Table rows:</p>
-                <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-gray-100 rounded">
+                <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-secondary rounded">
                   {JSON.stringify(table.rows, null, 2)}
                 </pre>
                 {markdown && (
                   <>
                     <p className="mt-4 mb-2">Raw markdown:</p>
-                    <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-gray-100 rounded">
+                    <pre className="overflow-auto overflow-y-auto p-2 max-h-96 bg-secondary rounded">
                       {markdown}
                     </pre>
                   </>
@@ -203,7 +203,7 @@ export default function EventView() {
   }
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50">
+    <div className="p-8 min-h-screen bg-background">
       <div className="mx-auto space-y-6 max-w-6xl">
         {viewMode === "vote" ? (
           <VotingForm
@@ -228,7 +228,7 @@ export default function EventView() {
                         }&view=vote`
                       );
                     }}
-                    className="text-sm text-blue-600 underline hover:text-blue-700"
+                    className="text-sm text-accent underline hover:text-accent/80"
                   >
                     Vote again
                   </button>

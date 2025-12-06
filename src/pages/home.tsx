@@ -183,13 +183,13 @@ export default function Home() {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50">
+    <div className="p-8 min-h-screen bg-background">
       <div className="mx-auto space-y-8 max-w-4xl">
         <div className="text-center">
-          <h1 className="mb-2 text-4xl font-bold text-gray-900">
+          <h1 className="mb-2 text-4xl font-bold text-foreground">
             Craft Events
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-muted-foreground">
             Connect to your Craft documents
           </p>
         </div>
@@ -239,7 +239,7 @@ export default function Home() {
                           ? window.location.origin
                           : ""
                       }/event/${createdEventId}?blob=${encodeURIComponent(encryptedBlob)}`}
-                      className="flex-1 px-2 py-1 font-mono text-xs bg-white rounded border"
+                      className="flex-1 px-2 py-1 font-mono text-xs bg-card rounded border"
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
                     <Button
@@ -262,7 +262,7 @@ export default function Home() {
             )}
 
             {insertError && (
-              <div className="p-3 text-sm text-center text-red-600 bg-red-50 rounded">
+              <div className="p-3 text-sm text-center text-destructive-foreground bg-destructive/20 rounded">
                 {insertError}
               </div>
             )}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/sonner";
 import "../index.css";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
           <div className="flex-1">{children}</div>
           <Footer />
         </Providers>
+        <Toaster />
       </body>
     </html>
   );
