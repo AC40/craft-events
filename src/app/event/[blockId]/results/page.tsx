@@ -15,8 +15,8 @@ export default function EventResultsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const blockId = params?.blockId as string;
-  const encryptedBlob = searchParams.get("blob");
-  const eventTitle = searchParams.get("title") || "Event scheduling";
+  const encryptedBlob = searchParams?.get("blob") || undefined;
+  const eventTitle = searchParams?.get("title") || "Event scheduling";
 
   const {
     data: block,
