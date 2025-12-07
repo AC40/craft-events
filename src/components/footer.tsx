@@ -29,6 +29,12 @@ export default function Footer() {
             >
               Privacy Policy
             </Link>
+            <a
+              href="mailto:contact@aaronrichter.tech?subject=Feedback%20-%20Craft%20Events"
+              className="text-sm transition-colors text-muted-foreground hover:text-accent"
+            >
+              Feedback
+            </a>
           </nav>
         </div>
       </div>
