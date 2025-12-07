@@ -207,14 +207,15 @@ export default function Home() {
   };
 
   return (
-    <div className="p-8 min-h-screen bg-background">
-      <div className="mx-auto space-y-8 max-w-4xl">
-        <div className="text-center">
-          <h1 className="mb-2 text-4xl font-bold text-foreground">
+    <div className="min-h-screen bg-background">
+      <div className="px-6 py-12 mx-auto max-w-4xl sm:px-8 sm:py-16 lg:py-20">
+        <div className="mb-12 text-center sm:mb-16">
+          <h1 className="mb-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             Craft Events
           </h1>
-          <p className="mb-4 text-lg text-muted-foreground">
-            Connect to your Craft documents
+          <p className="mb-6 text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+            The free Doodle alternative. No ads, no sign-ups, no data
+            collection.
           </p>
           <Link href="/how-it-works">
             <Button variant="outline" size="sm" className="gap-2">
@@ -223,103 +224,103 @@ export default function Home() {
           </Link>
         </div>
 
-        {!encryptedBlob ? (
-          <>
-            <UrlForm onSubmit={handleUrlSubmit} />
-            {eventHistory.length > 0 && (
-              <Card>
-                <CardHeader className="flex gap-4 justify-between items-center">
-                  <CardTitle className="text-base font-semibold">
-                    Previously accessed events
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setHistoryVisible((prev) => !prev)}
-                  >
-                    {historyVisible ? "Hide history" : "Show history"}
-                  </Button>
-                </CardHeader>
-                {historyVisible && (
-                  <CardContent className="space-y-4">
-                    {eventHistory.map((entry) => (
-                      <div
-                        key={entry.blockId}
-                        className="flex flex-col p-4 rounded-lg border transition-all border-border hover:border-accent sm:flex-row sm:items-start sm:justify-between sm:gap-4"
-                        style={{
-                          background: "var(--ar-card-gradient)",
-                        }}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {entry.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {entry.documentTitle
-                              ? `${entry.documentTitle} · `
-                              : ""}
-                            {new Date(entry.createdAt).toLocaleString()}
-                          </p>
+        <div className="space-y-10 sm:space-y-12">
+          {!encryptedBlob ? (
+            <>
+              <UrlForm onSubmit={handleUrlSubmit} />
+              {eventHistory.length > 0 && (
+                <Card className="shadow-lg border-border/50">
+                  <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:justify-between sm:items-center">
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                      Previously accessed events
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setHistoryVisible((prev) => !prev)}
+                      className="self-start sm:self-auto"
+                    >
+                      {historyVisible ? "Hide history" : "Show history"}
+                    </Button>
+                  </CardHeader>
+                  {historyVisible && (
+                    <CardContent className="pt-0 space-y-3">
+                      {eventHistory.map((entry) => (
+                        <div
+                          key={entry.blockId}
+                          className="flex flex-col gap-3 p-4 rounded-lg border transition-all group border-border hover:border-accent/50 hover:shadow-sm bg-card/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="mb-1 text-sm font-semibold truncate text-foreground">
+                              {entry.title}
+                            </p>
+                            <p className="text-xs leading-5 text-muted-foreground">
+                              {entry.documentTitle
+                                ? `${entry.documentTitle} · `
+                                : ""}
+                              {new Date(entry.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:shrink-0">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => router.push(entry.resultsUrl)}
+                              className="flex-1 sm:flex-none"
+                            >
+                              View results
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => router.push(entry.voteUrl)}
+                              className="flex-1 sm:flex-none"
+                            >
+                              Open voting
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-3 sm:mt-0">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => router.push(entry.resultsUrl)}
-                          >
-                            View results
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => router.push(entry.voteUrl)}
-                          >
-                            Open voting
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                )}
-              </Card>
-            )}
-          </>
-        ) : !selectedDocument ? (
-          <>
+                      ))}
+                    </CardContent>
+                  )}
+                </Card>
+              )}
+            </>
+          ) : !selectedDocument ? (
             <DocumentSelector
               encryptedBlob={encryptedBlob}
               onSelect={handleDocumentSelect}
               onBack={handleReset}
             />
-          </>
-        ) : (
-          <>
-            <EventForm
-              documentTitle={selectedDocument.title}
-              onSubmit={handleEventSubmit}
-              onBack={() => {
-                setSelectedDocument(null);
-                setInsertError(null);
-              }}
-            />
+          ) : (
+            <>
+              <EventForm
+                documentTitle={selectedDocument.title}
+                onSubmit={handleEventSubmit}
+                onBack={() => {
+                  setSelectedDocument(null);
+                  setInsertError(null);
+                }}
+              />
 
-            {isInserting && (
-              <div
-                aria-live="polite"
-                className="flex gap-2 justify-center items-center px-4 py-2 text-sm font-medium rounded border text-accent-foreground bg-accent border-accent"
-              >
-                <span className="w-2 h-2 rounded-full animate-pulse bg-accent-foreground" />
-                Creating a new event page...
-              </div>
-            )}
+              {isInserting && (
+                <div
+                  aria-live="polite"
+                  className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
+                >
+                  <span className="w-2 h-2 rounded-full animate-pulse bg-accent-foreground" />
+                  Creating a new event page...
+                </div>
+              )}
 
-            {insertError && (
-              <div className="p-3 text-sm text-center rounded border text-destructive-foreground bg-destructive/90 border-destructive/50">
-                {insertError}
-              </div>
-            )}
-          </>
-        )}
+              {insertError && (
+                <div className="p-4 text-sm text-center rounded-lg border shadow-sm text-destructive-foreground bg-destructive/90 border-destructive/50">
+                  {insertError}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -32,9 +32,14 @@ export default function EventResultsPage() {
     (row) => row.cells[0]?.value.trim().toLowerCase() === "organiser"
   );
 
-  const voteUrl = blockId && encryptedBlob
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/event/${blockId}?blob=${encodeURIComponent(encryptedBlob)}&title=${encodeURIComponent(eventTitle)}`
-    : "";
+  const voteUrl =
+    blockId && encryptedBlob
+      ? `${
+          typeof window !== "undefined" ? window.location.origin : ""
+        }/event/${blockId}?blob=${encodeURIComponent(
+          encryptedBlob
+        )}&title=${encodeURIComponent(eventTitle)}`
+      : "";
 
   useEffect(() => {
     if (!blockId || !encryptedBlob || !table) {
@@ -42,8 +47,12 @@ export default function EventResultsPage() {
     }
 
     const encodedTitle = encodeURIComponent(eventTitle);
-    const voteUrl = `/event/${blockId}?blob=${encodeURIComponent(encryptedBlob)}&title=${encodedTitle}`;
-    const resultsUrl = `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob)}&title=${encodedTitle}`;
+    const voteUrl = `/event/${blockId}?blob=${encodeURIComponent(
+      encryptedBlob
+    )}&title=${encodedTitle}`;
+    const resultsUrl = `/event/${blockId}/results?blob=${encodeURIComponent(
+      encryptedBlob
+    )}&title=${encodedTitle}`;
 
     addEventToHistory({
       blockId,
@@ -60,7 +69,8 @@ export default function EventResultsPage() {
       navigator.clipboard.writeText(voteUrl).then(() => {
         setHasCopied(true);
         toast.success("Voting link copied to clipboard!", {
-          description: "Share this link with participants to collect their availability.",
+          description:
+            "Share this link with participants to collect their availability.",
         });
       });
     }
@@ -78,8 +88,8 @@ export default function EventResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-8 min-h-screen bg-background">
+        <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
               <p className="text-center text-muted-foreground">
@@ -94,11 +104,11 @@ export default function EventResultsPage() {
 
   if (error || !block) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-8 min-h-screen bg-background">
+        <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
-              <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
+              <div className="p-3 text-sm rounded border text-destructive-foreground bg-destructive/90 border-destructive/50">
                 {error instanceof Error
                   ? error.message
                   : "Failed to load results"}
@@ -117,17 +127,17 @@ export default function EventResultsPage() {
 
   if (!table) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-8 min-h-screen bg-background">
+        <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-muted-foreground mb-4">
+              <p className="mb-4 text-center text-muted-foreground">
                 No table data found
               </p>
               {markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p className="mb-2">Markdown found:</p>
-                  <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 rounded bg-secondary">
                     {markdown}
                   </pre>
                 </div>
@@ -135,7 +145,7 @@ export default function EventResultsPage() {
               {!markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p>Block structure:</p>
-                  <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                  <pre className="overflow-auto overflow-y-auto p-2 max-h-96 rounded bg-secondary">
                     {JSON.stringify(block, null, 2)}
                   </pre>
                 </div>
@@ -149,26 +159,26 @@ export default function EventResultsPage() {
 
   if (timeSlots.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-8 min-h-screen bg-background">
+        <div className="mx-auto max-w-4xl">
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-muted-foreground mb-4">
+              <p className="mb-4 text-center text-muted-foreground">
                 No time slots found in table
               </p>
               <div className="text-xs text-muted-foreground">
                 <p className="mb-2">Table headers:</p>
-                <pre className="bg-secondary p-2 rounded overflow-auto">
+                <pre className="overflow-auto p-2 rounded bg-secondary">
                   {JSON.stringify(table.headers, null, 2)}
                 </pre>
-                <p className="mb-2 mt-4">Table rows:</p>
-                <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                <p className="mt-4 mb-2">Table rows:</p>
+                <pre className="overflow-auto overflow-y-auto p-2 max-h-96 rounded bg-secondary">
                   {JSON.stringify(table.rows, null, 2)}
                 </pre>
                 {markdown && (
                   <>
-                    <p className="mb-2 mt-4">Raw markdown:</p>
-                    <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                    <p className="mt-4 mb-2">Raw markdown:</p>
+                    <pre className="overflow-auto overflow-y-auto p-2 max-h-96 rounded bg-secondary">
                       {markdown}
                     </pre>
                   </>
@@ -182,8 +192,8 @@ export default function EventResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="p-8 min-h-screen bg-background">
+      <div className="mx-auto space-y-6 max-w-6xl">
         <div className="space-y-1">
           <div className="mb-2">
             <Link href="/">
@@ -193,25 +203,27 @@ export default function EventResultsPage() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">Event results</p>
-          <h1 className="text-3xl font-semibold text-foreground">{eventTitle}</h1>
+          <h1 className="text-3xl font-semibold text-foreground">
+            {eventTitle}
+          </h1>
         </div>
 
         <ResultsView table={table} timeSlots={timeSlots} />
 
         {isOrganiser && (
           <Card>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="p-6 space-y-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground">
                   Share with participants
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  This event was created in Craft. Share the voting link below so
-                  participants can mark their availability.
+                  This event was created in Craft. Share the voting link below
+                  so participants can mark their availability.
                 </p>
               </div>
               <div className="flex gap-2 items-center">
-                <div className="flex-1 p-3 bg-secondary rounded border border-border text-sm font-mono break-all">
+                <div className="flex-1 p-3 font-mono text-sm break-all rounded border bg-secondary border-border">
                   {voteUrl}
                 </div>
                 <Button onClick={handleCopyLink} variant="outline">
@@ -224,16 +236,16 @@ export default function EventResultsPage() {
 
         <Card>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground">
               Need to update your availability? Head to the voting view.
             </p>
             <Button
               variant="outline"
               onClick={() =>
                 router.push(
-                  `/event/${blockId}?blob=${encodeURIComponent(encryptedBlob || "")}&title=${encodeURIComponent(
-                    eventTitle
-                  )}`
+                  `/event/${blockId}?blob=${encodeURIComponent(
+                    encryptedBlob || ""
+                  )}&title=${encodeURIComponent(eventTitle)}`
                 )
               }
             >

@@ -43,17 +43,19 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Connect to Craft</CardTitle>
-        <CardDescription>
+    <Card className="w-full shadow-lg border-border/50">
+      <CardHeader className="space-y-2 pb-4">
+        <CardTitle className="text-xl font-semibold">Connect to Craft</CardTitle>
+        <CardDescription className="text-sm leading-6">
           Enter your Craft document URL to get started
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="url">Craft Doc URL</Label>
+            <Label htmlFor="url" className="text-sm font-medium">
+              Craft Doc URL
+            </Label>
             <Input
               id="url"
               type="text"
@@ -61,11 +63,14 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               disabled={isSubmitting}
+              className="h-11"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="apiKey">API Key (optional)</Label>
+            <Label htmlFor="apiKey" className="text-sm font-medium">
+              API Key <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
             <Input
               id="apiKey"
               type="password"
@@ -73,16 +78,22 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               disabled={isSubmitting}
+              className="h-11"
             />
           </div>
 
           {error && (
-            <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
+            <div className="text-sm text-destructive-foreground bg-destructive/90 p-3.5 rounded-lg border border-destructive/50">
               {error}
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            className="w-full h-11 font-medium" 
+            disabled={isSubmitting}
+            size="lg"
+          >
             {isSubmitting ? "Connecting..." : "Connect"}
           </Button>
         </form>
