@@ -213,7 +213,7 @@ export default function Home() {
           <h1 className="mb-2 text-4xl font-bold text-foreground">
             Craft Events
           </h1>
-          <p className="text-lg text-muted-foreground mb-4">
+          <p className="mb-4 text-lg text-muted-foreground">
             Connect to your Craft documents
           </p>
           <Link href="/how-it-works">
@@ -245,7 +245,7 @@ export default function Home() {
                     {eventHistory.map((entry) => (
                       <div
                         key={entry.blockId}
-                        className="flex flex-col p-4 rounded-lg border border-border hover:border-accent transition-all sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+                        className="flex flex-col p-4 rounded-lg border transition-all border-border hover:border-accent sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                         style={{
                           background: "var(--ar-card-gradient)",
                         }}
