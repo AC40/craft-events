@@ -1,6 +1,6 @@
 "use client";
 
-import { TelemetryDeck } from "@telemetrydeck/sdk";
+import TelemetryDeck from "@telemetrydeck/sdk";
 import { useEffect } from "react";
 
 function getOrCreateClientUser(): string {
