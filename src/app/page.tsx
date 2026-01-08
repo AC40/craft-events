@@ -17,6 +17,7 @@ import {
 } from "@/lib/eventHistory";
 import type { CraftDocument } from "@/lib/craftApi";
 import type { EventFormData } from "@/components/eventForm";
+import TimezoneTester from "@/components/timezoneTester";
 
 export default function Home() {
   const router = useRouter();
@@ -117,9 +118,22 @@ export default function Home() {
 
       await createBlocks(blob, pageId, [separatorBlock]);
 
+      // Store timezone as a separate block BEFORE the table (hidden metadata)
+      const { formatTimezoneBlock } = await import("@/lib/tableParser");
+      const { getCurrentTimezone } = await import("@/lib/timezoneUtils");
+      const creatorTimezone = getCurrentTimezone();
+
+      const timezoneBlock = {
+        type: "text",
+        markdown: formatTimezoneBlock(creatorTimezone),
+      };
+      await createBlocks(blob, pageId, [timezoneBlock]);
+
       const tableHeaders = [
         "Name",
-        ...timeSlots.map((slot) => formatTableHeader(slot.date, slot.hour)),
+        ...timeSlots.map((slot) =>
+          formatTableHeader(slot.date, creatorTimezone)
+        ),
       ];
       const tableSeparator = ["---", ...timeSlots.map(() => "---")];
       const organiserRow = ["Organiser", ...timeSlots.map(() => "✅")];
@@ -148,7 +162,7 @@ export default function Home() {
       )}&title=${encodedTitle}`;
       const resultsUrl = `${baseUrl}/event/${tableBlockId}/results?blob=${encodeURIComponent(
         blob
-      )}&title=${encodedTitle}`;
+      )}&title=${encodedTitle}&justCreated=true`;
       const linkBlock = {
         type: "text",
         markdown: `[Vote on availability →](${voteUrl})\n\n[View live results →](${resultsUrl})`,
@@ -225,6 +239,7 @@ export default function Home() {
         </div>
 
         <div className="space-y-10 sm:space-y-12">
+          <TimezoneTester />
           {!encryptedBlob ? (
             <>
               <UrlForm onSubmit={handleUrlSubmit} />

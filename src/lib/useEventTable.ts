@@ -3,7 +3,11 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getBlock } from "@/app/actions";
-import { parseMarkdownTable, parseTableToTimeSlots } from "@/lib/tableParser";
+import {
+  parseMarkdownTable,
+  parseTableToTimeSlots,
+  extractTimezone,
+} from "@/lib/tableParser";
 
 const extractMarkdownFromBlock = (block: any): string | null => {
   if (block?.markdown) {
@@ -22,14 +26,62 @@ const extractMarkdownFromBlock = (block: any): string | null => {
   return null;
 };
 
+/**
+ * Extracts all markdown from sibling blocks (for finding timezone metadata)
+ */
+const extractAllMarkdownFromBlocks = (blocks: any[]): string[] => {
+  const markdowns: string[] = [];
+  for (const block of blocks) {
+    const md = extractMarkdownFromBlock(block);
+    if (md) {
+      markdowns.push(md);
+    }
+    // Also check nested blocks
+    if (block?.blocks && Array.isArray(block.blocks)) {
+      markdowns.push(...extractAllMarkdownFromBlocks(block.blocks));
+    }
+    if (block?.content && Array.isArray(block.content)) {
+      markdowns.push(...extractAllMarkdownFromBlocks(block.content));
+    }
+  }
+  return markdowns;
+};
+
+/**
+ * Gets the parent page block to access sibling blocks (like timezone metadata)
+ */
+async function getParentPageBlock(
+  blockId: string,
+  encryptedBlob: string
+): Promise<any | null> {
+  try {
+    // Fetch the block with depth 1 to get parent info
+    const block = await getBlock(encryptedBlob, blockId, 1);
+
+    // If block has a parent reference, try to fetch it
+    // Otherwise, we need to fetch the page that contains this block
+    // For now, we'll check if the block structure includes parent/sibling info
+    return block;
+  } catch (error) {
+    console.error("[useEventTable] Failed to fetch parent block:", error);
+    return null;
+  }
+}
+
 export function useEventTable(blockId?: string, encryptedBlob?: string) {
   const query = useQuery({
     queryKey: ["event_block", blockId, encryptedBlob],
-    queryFn: () => {
+    queryFn: async () => {
       if (!blockId || !encryptedBlob) {
         throw new Error("Missing block identifier or encrypted blob");
       }
-      return getBlock(encryptedBlob, blockId, 0);
+      // Fetch the table block
+      const tableBlock = await getBlock(encryptedBlob, blockId, 0);
+
+      // Fetch with depth 1 to get parent page and sibling blocks (timezone is stored before table)
+      const blockWithContext = await getBlock(encryptedBlob, blockId, 1);
+
+      return { tableBlock, blockWithContext };
     },
     enabled: !!blockId && !!encryptedBlob,
   });
@@ -38,7 +90,9 @@ export function useEventTable(blockId?: string, encryptedBlob?: string) {
     if (!query.data) {
       return null;
     }
-    return extractMarkdownFromBlock(query.data);
+    // Get markdown from the table block
+    const data = query.data;
+    return extractMarkdownFromBlock(data.tableBlock || data);
   }, [query.data]);
 
   const table = useMemo(() => {
@@ -48,21 +102,64 @@ export function useEventTable(blockId?: string, encryptedBlob?: string) {
     return parseMarkdownTable(markdown);
   }, [markdown]);
 
+  const timezone = useMemo(() => {
+    if (!query.data) {
+      return null;
+    }
+
+    const data = query.data;
+    const allMarkdowns: string[] = [];
+
+    // Get markdown from table block
+    const tableMd = extractMarkdownFromBlock(data.tableBlock || data);
+    if (tableMd) {
+      allMarkdowns.push(tableMd);
+    }
+
+    // Check parent/sibling blocks for timezone (stored before table as separate block)
+    if (data.blockWithContext) {
+      // Check if there are sibling blocks in the parent
+      if (
+        data.blockWithContext.blocks &&
+        Array.isArray(data.blockWithContext.blocks)
+      ) {
+        allMarkdowns.push(
+          ...extractAllMarkdownFromBlocks(data.blockWithContext.blocks)
+        );
+      }
+      if (
+        data.blockWithContext.content &&
+        Array.isArray(data.blockWithContext.content)
+      ) {
+        allMarkdowns.push(
+          ...extractAllMarkdownFromBlocks(data.blockWithContext.content)
+        );
+      }
+    }
+
+    // Search through all markdown for timezone
+    for (const md of allMarkdowns) {
+      const tz = extractTimezone(md);
+      if (tz) {
+        return tz;
+      }
+    }
+
+    return null;
+  }, [query.data]);
+
   const timeSlots = useMemo(() => {
     if (!table) {
       return [];
     }
-    return parseTableToTimeSlots(table);
-  }, [table]);
+    return parseTableToTimeSlots(table, timezone);
+  }, [table, timezone]);
 
   return {
     ...query,
     markdown,
     table,
     timeSlots,
+    timezone,
   };
 }
-
-
-
-

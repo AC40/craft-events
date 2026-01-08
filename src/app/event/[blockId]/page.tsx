@@ -28,6 +28,7 @@ export default function EventView() {
     table,
     timeSlots,
     markdown,
+    timezone,
   } = useEventTable(blockId, encryptedBlob);
 
   useEffect(() => {
@@ -36,8 +37,12 @@ export default function EventView() {
     }
 
     const encodedTitle = encodeURIComponent(eventTitle);
-    const voteUrl = `/event/${blockId}?blob=${encodeURIComponent(encryptedBlob)}&title=${encodedTitle}`;
-    const resultsUrl = `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob)}&title=${encodedTitle}`;
+    const voteUrl = `/event/${blockId}?blob=${encodeURIComponent(
+      encryptedBlob
+    )}&title=${encodedTitle}`;
+    const resultsUrl = `/event/${blockId}/results?blob=${encodeURIComponent(
+      encryptedBlob
+    )}&title=${encodedTitle}`;
 
     addEventToHistory({
       blockId,
@@ -72,9 +77,9 @@ export default function EventView() {
         queryKey: ["event_block", blockId, encryptedBlob],
       });
       router.push(
-        `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob || "")}&title=${encodeURIComponent(
-          eventTitle
-        )}`
+        `/event/${blockId}/results?blob=${encodeURIComponent(
+          encryptedBlob || ""
+        )}&title=${encodeURIComponent(eventTitle)}`
       );
     },
   });
@@ -203,12 +208,15 @@ export default function EventView() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">Event polling</p>
-          <h1 className="text-3xl font-semibold text-foreground">{eventTitle}</h1>
+          <h1 className="text-3xl font-semibold text-foreground">
+            {eventTitle}
+          </h1>
         </div>
 
         <VotingForm
           table={table}
           timeSlots={timeSlots}
+          timezone={timezone}
           onSubmit={handleVoteSubmit}
           onBack={() => router.push("/")}
         />
@@ -222,9 +230,9 @@ export default function EventView() {
               variant="outline"
               onClick={() =>
                 router.push(
-                  `/event/${blockId}/results?blob=${encodeURIComponent(encryptedBlob || "")}&title=${encodeURIComponent(
-                    eventTitle
-                  )}`
+                  `/event/${blockId}/results?blob=${encodeURIComponent(
+                    encryptedBlob || ""
+                  )}&title=${encodeURIComponent(eventTitle)}`
                 )
               }
             >

@@ -25,9 +25,8 @@ export default function EventResultsPage() {
     table,
     timeSlots,
     markdown,
+    timezone,
   } = useEventTable(blockId, encryptedBlob);
-  const [hasCopied, setHasCopied] = useState(false);
-
   const isOrganiser = table?.rows.some(
     (row) => row.cells[0]?.value.trim().toLowerCase() === "organiser"
   );
@@ -65,16 +64,26 @@ export default function EventResultsPage() {
   }, [blockId, encryptedBlob, eventTitle, table]);
 
   useEffect(() => {
-    if (isOrganiser && voteUrl && !hasCopied) {
+    if (!isOrganiser || !voteUrl || !blockId) {
+      return;
+    }
+
+    // Only copy on initial visit after creation (when justCreated query param is present)
+    const justCreated = searchParams?.get("justCreated") === "true";
+    
+    if (justCreated) {
       navigator.clipboard.writeText(voteUrl).then(() => {
-        setHasCopied(true);
         toast.success("Voting link copied to clipboard!", {
           description:
             "Share this link with participants to collect their availability.",
         });
+        // Remove the query parameter from URL without reloading
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("justCreated");
+        window.history.replaceState({}, "", newUrl.toString());
       });
     }
-  }, [isOrganiser, voteUrl, hasCopied]);
+  }, [isOrganiser, voteUrl, blockId, searchParams]);
 
   const handleCopyLink = async () => {
     if (!voteUrl) return;
@@ -208,7 +217,7 @@ export default function EventResultsPage() {
           </h1>
         </div>
 
-        <ResultsView table={table} timeSlots={timeSlots} />
+        <ResultsView table={table} timeSlots={timeSlots} timezone={timezone} />
 
         {isOrganiser && (
           <Card>

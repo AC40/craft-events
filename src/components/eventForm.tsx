@@ -30,17 +30,119 @@ interface EventFormProps {
   onBack?: () => void;
 }
 
-const generateTimeSlots = (startDate: Date, days: number): TimeSlot[] => {
+const generateTimeSlots = (
+  startDate: Date,
+  days: number,
+  timezone?: string
+): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
+  // Helper to create a date in the specified timezone
+  const createDateInTimezone = (
+    year: number,
+    month: number,
+    day: number,
+    hour: number,
+    minute: number,
+    tz: string
+  ): Date => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const baseUtc = Date.UTC(year, month, day, hour, minute);
+    const searchWindow = 16 * 60 * 60 * 1000;
+    let low = baseUtc - searchWindow;
+    let high = baseUtc + searchWindow;
+
+    for (let i = 0; i < 30; i++) {
+      const mid = Math.floor((low + high) / 2);
+      const testDate = new Date(mid);
+      const parts = formatter.formatToParts(testDate);
+
+      const tzYear = parseInt(
+        parts.find((p) => p.type === "year")?.value || "0",
+        10
+      );
+      const tzMonth =
+        parseInt(parts.find((p) => p.type === "month")?.value || "0", 10) - 1;
+      const tzDay = parseInt(
+        parts.find((p) => p.type === "day")?.value || "0",
+        10
+      );
+      const tzHour = parseInt(
+        parts.find((p) => p.type === "hour")?.value || "0",
+        10
+      );
+      const tzMinute = parseInt(
+        parts.find((p) => p.type === "minute")?.value || "0",
+        10
+      );
+
+      if (
+        tzYear === year &&
+        tzMonth === month &&
+        tzDay === day &&
+        tzHour === hour &&
+        tzMinute === minute
+      ) {
+        return testDate;
+      }
+
+      const targetValue =
+        year * 100000000 + month * 1000000 + day * 10000 + hour * 100 + minute;
+      const currentValue =
+        tzYear * 100000000 +
+        tzMonth * 1000000 +
+        tzDay * 10000 +
+        tzHour * 100 +
+        tzMinute;
+
+      if (currentValue < targetValue) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+
+      if (low >= high) break;
+    }
+
+    return new Date(Math.floor((low + high) / 2));
+  };
+
+  const tz = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const startYear = startDate.getFullYear();
+  const startMonth = startDate.getMonth();
+  const startDay = startDate.getDate();
+
   for (let day = 0; day < days; day++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + day);
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + day);
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const dayOfMonth = currentDate.getDate();
 
     for (const hour of hours) {
+      // Create date object representing this moment in the creator's timezone
+      const slotDate = createDateInTimezone(
+        year,
+        month,
+        dayOfMonth,
+        hour,
+        0,
+        tz
+      );
+
       slots.push({
-        date: new Date(date),
+        date: slotDate,
         hour,
         selected: false,
       });
@@ -75,13 +177,21 @@ export default function EventForm({
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return today.toISOString().split("T")[0];
+    // Format as YYYY-MM-DD in local timezone (not UTC)
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   });
   const [endDate, setEndDate] = useState(() => {
     const nextWeek = new Date();
     nextWeek.setHours(0, 0, 0, 0);
     nextWeek.setDate(nextWeek.getDate() + 6);
-    return nextWeek.toISOString().split("T")[0];
+    // Format as YYYY-MM-DD in local timezone (not UTC)
+    const year = nextWeek.getFullYear();
+    const month = String(nextWeek.getMonth() + 1).padStart(2, "0");
+    const day = String(nextWeek.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(() => {
     const today = new Date();
@@ -92,7 +202,19 @@ export default function EventForm({
       Math.ceil(
         (nextWeek.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       ) + 1;
-    return generateTimeSlots(today, daysDiff);
+    // Get creator's timezone (may be overridden by tester)
+    const creatorTimezone =
+      typeof window !== "undefined"
+        ? (() => {
+            try {
+              const { getCurrentTimezone } = require("@/lib/timezoneUtils");
+              return getCurrentTimezone();
+            } catch {
+              return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+          })()
+        : "UTC";
+    return generateTimeSlots(today, daysDiff, creatorTimezone);
   });
   const [showAbortDialog, setShowAbortDialog] = useState(false);
 
@@ -111,7 +233,20 @@ export default function EventForm({
         (endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)
       ) + 1;
 
-    const newSlots = generateTimeSlots(startDateObj, daysDiff);
+    // Get creator's timezone (may be overridden by tester)
+    const creatorTimezone =
+      typeof window !== "undefined"
+        ? (() => {
+            try {
+              const { getCurrentTimezone } = require("@/lib/timezoneUtils");
+              return getCurrentTimezone();
+            } catch {
+              return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
+          })()
+        : "UTC";
+
+    const newSlots = generateTimeSlots(startDateObj, daysDiff, creatorTimezone);
 
     setTimeSlots((prev) => {
       const selectedSlots = new Map<string, boolean>();
@@ -194,7 +329,12 @@ export default function EventForm({
     return acc;
   }, {} as Record<string, Array<TimeSlot & { index: number }>>);
 
-  const dates = Object.keys(groupedSlots).sort();
+  // Sort dates chronologically by converting back to Date objects
+  const dates = Object.keys(groupedSlots).sort((a, b) => {
+    const dateA = new Date(a).getTime();
+    const dateB = new Date(b).getTime();
+    return dateA - dateB;
+  });
 
   return (
     <>
@@ -259,7 +399,16 @@ export default function EventForm({
                       type="date"
                       value={startDate}
                       onChange={handleStartDateChange}
-                      min={new Date().toISOString().split("T")[0]}
+                      min={(() => {
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(
+                          2,
+                          "0"
+                        );
+                        const day = String(today.getDate()).padStart(2, "0");
+                        return `${year}-${month}-${day}`;
+                      })()}
                     />
                   </div>
                   <div className="space-y-2">

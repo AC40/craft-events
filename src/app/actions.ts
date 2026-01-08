@@ -59,8 +59,41 @@ export async function createBlocks(
     textStyle?: string;
   }>
 ): Promise<InsertBlockResponse> {
-  const secrets = await decryptSecrets(encryptedBlob);
-  return insertBlocks(secrets.apiUrl, documentId, blocks, secrets.apiKey);
+  console.log("[createBlocks] Creating blocks:", {
+    documentId,
+    blocksCount: blocks.length,
+    blocks: blocks.map((b, i) => ({
+      index: i,
+      type: b.type,
+      textStyle: b.textStyle,
+      markdownPreview: b.markdown
+        ? b.markdown.substring(0, 100) + (b.markdown.length > 100 ? "..." : "")
+        : undefined,
+      markdownLength: b.markdown?.length || 0,
+      hasContent: !!b.content,
+    })),
+  });
+
+  try {
+    const secrets = await decryptSecrets(encryptedBlob);
+    const result = await insertBlocks(
+      secrets.apiUrl,
+      documentId,
+      blocks,
+      secrets.apiKey
+    );
+    console.log("[createBlocks] Success:", {
+      itemsCount: result.items?.length || 0,
+    });
+    return result;
+  } catch (error) {
+    console.error("[createBlocks] Error:", {
+      error: error instanceof Error ? error.message : String(error),
+      documentId,
+      blocksCount: blocks.length,
+    });
+    throw error;
+  }
 }
 
 export async function modifyBlock(

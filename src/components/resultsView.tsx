@@ -6,31 +6,39 @@ import {
   CardTitle,
 } from "./ui/card";
 import type { ParsedTable } from "@/lib/tableParser";
+import {
+  formatDateInTimezone,
+  formatTimeInTimezone,
+  getLocalTimeString,
+} from "@/lib/tableParser";
 
 interface ResultsViewProps {
   table: ParsedTable;
   timeSlots: Array<{ date: Date; hour: number }>;
+  timezone?: string | null;
 }
 
-export default function ResultsView({ table, timeSlots }: ResultsViewProps) {
+export default function ResultsView({
+  table,
+  timeSlots,
+  timezone,
+}: ResultsViewProps) {
   const formatDate = (date: Date): string => {
-    const month = date
-      .toLocaleDateString("en-US", { month: "short" })
-      .toUpperCase();
-    const day = date.getDate();
-    const weekday = date
-      .toLocaleDateString("en-US", { weekday: "short" })
-      .toUpperCase();
-    return `${month} ${day} ${weekday}`;
+    const formatted = formatDateInTimezone(date, timezone, {
+      month: "short",
+      day: "numeric",
+      weekday: "short",
+    });
+    return formatted.toUpperCase();
   };
 
-  const formatTime = (hour: number): string => {
-    const period = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    const nextHour =
-      hour + 1 > 12 ? hour + 1 - 12 : hour + 1 === 0 ? 12 : hour + 1;
-    const nextPeriod = hour + 1 >= 12 ? "PM" : "AM";
-    return `${displayHour}:00 ${period} - ${nextHour}:00 ${nextPeriod}`;
+  const formatTime = (date: Date): string => {
+    const timeStr = formatTimeInTimezone(date, timezone);
+    const localTime = getLocalTimeString(date, timezone);
+    if (localTime) {
+      return `${timeStr} (${localTime})`;
+    }
+    return timeStr;
   };
 
   const getParticipantCount = (slotIndex: number): number => {
@@ -65,7 +73,7 @@ export default function ResultsView({ table, timeSlots }: ResultsViewProps) {
                       {formatDate(slot.date)}
                     </div>
                     <div className="mb-1 text-xs text-muted-foreground">
-                      {formatTime(slot.hour)}
+                      {formatTime(slot.date)}
                     </div>
                     <div className="text-xs font-medium text-accent">
                       👥 {getParticipantCount(index)} available

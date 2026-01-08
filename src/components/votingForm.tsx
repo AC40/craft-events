@@ -11,10 +11,16 @@ import {
 } from "./ui/card";
 import ConfirmDialog from "./confirmDialog";
 import type { ParsedTable } from "@/lib/tableParser";
+import {
+  formatDateInTimezone,
+  formatTimeInTimezone,
+  getLocalTimeString,
+} from "@/lib/tableParser";
 
 interface VotingFormProps {
   table: ParsedTable;
   timeSlots: Array<{ date: Date; hour: number }>;
+  timezone?: string | null;
   onSubmit: (name: string, votes: Record<number, boolean>) => Promise<void>;
   onBack?: () => void;
 }
@@ -22,6 +28,7 @@ interface VotingFormProps {
 export default function VotingForm({
   table,
   timeSlots,
+  timezone,
   onSubmit,
   onBack,
 }: VotingFormProps) {
@@ -69,17 +76,16 @@ export default function VotingForm({
   };
 
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
+    return formatDateInTimezone(date, timezone);
   };
 
-  const formatTime = (hour: number): string => {
-    const period = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour}:00 ${period}`;
+  const formatTime = (date: Date): string => {
+    const timeStr = formatTimeInTimezone(date, timezone);
+    const localTime = getLocalTimeString(date, timezone);
+    if (localTime) {
+      return `${timeStr} (${localTime} your time)`;
+    }
+    return timeStr;
   };
 
   return (
@@ -100,27 +106,27 @@ export default function VotingForm({
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Your Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="space-y-4">
-            <Label>Select Available Time Slots</Label>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {timeSlots.map((slot, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => toggleVote(index)}
-                  className={`
+            <div className="space-y-4">
+              <Label>Select Available Time Slots</Label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {timeSlots.map((slot, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => toggleVote(index)}
+                    className={`
                     p-4 rounded-lg border-2 transition-all text-left min-h-[100px] flex flex-col justify-between
                     ${
                       votes[index]
@@ -128,42 +134,44 @@ export default function VotingForm({
                         : "bg-card border-border hover:border-accent/50"
                     }
                   `}
-                >
-                  <div>
-                    <div className="font-medium">{formatDate(slot.date)}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatTime(slot.hour)}
-                    </div>
-                  </div>
-                  <div
-                    className={`mt-2 font-bold text-accent ${votes[index] ? "" : "invisible"}`}
                   >
-                    ✓ Available
-                  </div>
-                </button>
-              ))}
+                    <div>
+                      <div className="font-medium">{formatDate(slot.date)}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatTime(slot.date)}
+                      </div>
+                    </div>
+                    <div
+                      className={`mt-2 font-bold text-accent ${
+                        votes[index] ? "" : "invisible"
+                      }`}
+                    >
+                      ✓ Available
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || !name.trim()}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Vote"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-    <ConfirmDialog
-      open={showAbortDialog}
-      title="Discard unsaved votes?"
-      description="You have unsaved votes. Are you sure you want to go back? Your selections will be lost."
-      confirmLabel="Discard"
-      cancelLabel="Cancel"
-      onConfirm={handleAbortConfirm}
-      onCancel={() => setShowAbortDialog(false)}
-    />
-  </>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || !name.trim()}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Vote"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <ConfirmDialog
+        open={showAbortDialog}
+        title="Discard unsaved votes?"
+        description="You have unsaved votes. Are you sure you want to go back? Your selections will be lost."
+        confirmLabel="Discard"
+        cancelLabel="Cancel"
+        onConfirm={handleAbortConfirm}
+        onCancel={() => setShowAbortDialog(false)}
+      />
+    </>
   );
 }
