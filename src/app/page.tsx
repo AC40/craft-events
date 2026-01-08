@@ -96,14 +96,14 @@ export default function Home() {
       if (description) {
         blocks.push({
           type: "text",
-          markdown: description,
+          markdown: `📝 ${description}`,
         });
       }
 
       if (location) {
         blocks.push({
           type: "text",
-          markdown: location,
+          markdown: `📍 ${location}`,
         });
       }
 
