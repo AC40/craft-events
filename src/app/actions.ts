@@ -3,13 +3,16 @@
 import { encrypt, decrypt, type EncryptedSecrets } from "@/lib/crypto";
 import {
   fetchDocuments,
+  fetchFolders,
   fetchBlock,
   insertBlocks,
   updateBlock,
   type DocumentsResponse,
+  type FoldersResponse,
   type Block,
   type InsertBlockResponse,
 } from "@/lib/craftApi";
+import type { CraftConnectionType } from "@/types/connection";
 
 function getMasterKey(): string {
   const masterKey = process.env.MASTER_KEY;
@@ -80,4 +83,53 @@ export async function modifyBlock(
 ): Promise<Block> {
   const secrets = await decryptSecrets(encryptedBlob);
   return updateBlock(secrets.apiUrl, blockId, markdown, secrets.apiKey);
+}
+
+export async function decryptSecretsForEdit(
+  encryptedBlob: string
+): Promise<EncryptedSecrets> {
+  return decryptSecrets(encryptedBlob);
+}
+
+export async function getFolders(
+  encryptedBlob: string
+): Promise<FoldersResponse> {
+  const secrets = await decryptSecrets(encryptedBlob);
+  return fetchFolders(secrets.apiUrl, secrets.apiKey);
+}
+
+export async function getDocumentsInFolder(
+  encryptedBlob: string,
+  folderId: string
+): Promise<DocumentsResponse> {
+  const secrets = await decryptSecrets(encryptedBlob);
+  return fetchDocuments(secrets.apiUrl, secrets.apiKey, { folderId });
+}
+
+export async function getDocumentsByLocation(
+  encryptedBlob: string,
+  location: string
+): Promise<DocumentsResponse> {
+  const secrets = await decryptSecrets(encryptedBlob);
+  return fetchDocuments(secrets.apiUrl, secrets.apiKey, { location });
+}
+
+export async function testConnection(
+  encryptedBlob: string,
+  type: CraftConnectionType
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const secrets = await decryptSecrets(encryptedBlob);
+    if (type === "folders") {
+      await fetchFolders(secrets.apiUrl, secrets.apiKey);
+    } else {
+      await fetchDocuments(secrets.apiUrl, secrets.apiKey);
+    }
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Connection failed",
+    };
+  }
 }

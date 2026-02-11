@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { TelemetryProvider } from "@/components/telemetryProvider";
+import { ConnectionProvider } from "@/contexts/connectionContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -18,7 +19,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TelemetryProvider>{children}</TelemetryProvider>
+      <TelemetryProvider>
+        <ConnectionProvider>{children}</ConnectionProvider>
+      </TelemetryProvider>
     </QueryClientProvider>
   );
 }

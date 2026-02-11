@@ -31,7 +31,8 @@ export function normalizeApiUrl(url: string): string {
 
 export async function fetchDocuments(
   apiUrl: string,
-  apiKey?: string
+  apiKey?: string,
+  options?: { folderId?: string; location?: string }
 ): Promise<DocumentsResponse> {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -41,13 +42,53 @@ export async function fetchDocuments(
     headers["Authorization"] = `Bearer ${apiKey}`;
   }
 
-  const response = await fetch(`${apiUrl}/documents`, {
+  const params = new URLSearchParams();
+  if (options?.folderId) params.set("folderId", options.folderId);
+  if (options?.location) params.set("location", options.location);
+  const qs = params.toString();
+  const url = `${apiUrl}/documents${qs ? `?${qs}` : ""}`;
+
+  const response = await fetch(url, {
     method: "GET",
     headers,
   });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch documents: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export interface CraftFolder {
+  id: string;
+  name: string;
+  children?: CraftFolder[];
+}
+
+export interface FoldersResponse {
+  items: CraftFolder[];
+}
+
+export async function fetchFolders(
+  apiUrl: string,
+  apiKey?: string
+): Promise<FoldersResponse> {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (apiKey) {
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  }
+
+  const response = await fetch(`${apiUrl}/folders`, {
+    method: "GET",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch folders: ${response.statusText}`);
   }
 
   return response.json();

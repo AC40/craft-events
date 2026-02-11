@@ -1,31 +1,38 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { LoaderCircle, CircleCheck } from "lucide-react";
-import UrlForm from "@/components/urlForm";
+import { LoaderCircle, CircleCheck, ArrowLeft } from "lucide-react";
+import ConnectionPicker from "@/components/connectionPicker";
 import DocumentSelector from "@/components/documentSelector";
 import EventForm from "@/components/eventForm";
 import StepIndicator from "@/components/stepIndicator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { encryptSecrets, createBlocks } from "@/app/actions";
+import { useConnections } from "@/contexts/connectionContext";
+import { createBlocks } from "@/app/actions";
 import {
   addEventToHistory,
   loadEventHistory,
   type EventHistoryEntry,
 } from "@/lib/eventHistory";
 import type { CraftDocument } from "@/lib/craftApi";
+import type { CraftConnection } from "@/types/connection";
 import type { EventFormData } from "@/components/eventForm";
 import TimezoneTester from "@/components/timezoneTester";
 import { sanitizeInput, MAX_LENGTHS } from "@/lib/sanitize";
 
 export default function Home() {
   const router = useRouter();
+  const { activeConnection, rememberDocument, setActiveConnection } =
+    useConnections();
+
   const [encryptedBlob, setEncryptedBlob] = useState<string | null>(null);
+  const [currentConnection, setCurrentConnection] =
+    useState<CraftConnection | null>(null);
   const [selectedDocument, setSelectedDocument] =
     useState<CraftDocument | null>(null);
   const [isInserting, setIsInserting] = useState(false);
@@ -42,22 +49,32 @@ export default function Home() {
     };
   }, []);
 
-  const handleUrlSubmit = async (url: string, key?: string) => {
-    try {
-      const blob = await encryptSecrets({ apiUrl: url, apiKey: key });
+  // Auto-skip: when a connection is activated with a remembered document, jump straight to step 2
+  const handleConnectionReady = useCallback(
+    (blob: string, connection: CraftConnection) => {
       setEncryptedBlob(blob);
-      setSelectedDocument(null);
+      setCurrentConnection(connection);
       setInsertError(null);
-    } catch (error) {
-      setInsertError(
-        error instanceof Error ? error.message : "Failed to encrypt credentials"
-      );
-    }
-  };
 
-  const handleDocumentSelect = async (document: CraftDocument) => {
+      if (connection.lastDocumentId && connection.lastDocumentTitle) {
+        setSelectedDocument({
+          id: connection.lastDocumentId,
+          title: connection.lastDocumentTitle,
+          isDeleted: false,
+        });
+      } else {
+        setSelectedDocument(null);
+      }
+    },
+    []
+  );
+
+  const handleDocumentSelect = (document: CraftDocument) => {
     setSelectedDocument(document);
     setInsertError(null);
+    if (currentConnection) {
+      rememberDocument(currentConnection.id, document.id, document.title);
+    }
   };
 
   const createEventMutation = useMutation({
@@ -233,9 +250,16 @@ export default function Home() {
 
   const handleReset = () => {
     setEncryptedBlob(null);
+    setCurrentConnection(null);
     setSelectedDocument(null);
     setInsertError(null);
     setSuccessUrl(null);
+    setActiveConnection(null);
+  };
+
+  const handleBackToDocuments = () => {
+    setSelectedDocument(null);
+    setInsertError(null);
   };
 
   const currentStep = !encryptedBlob ? 0 : !selectedDocument ? 1 : 2;
@@ -247,172 +271,250 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="px-6 py-12 mx-auto max-w-4xl sm:px-8 sm:py-16 lg:py-20">
-        <div className="mb-12 text-center sm:mb-16">
-          <h1 className="mb-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Craft Events
-          </h1>
-          <p className="mb-6 text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-            The free Doodle alternative. No ads, no sign-ups, no data
-            collection.
-          </p>
-          <Link href="/how-it-works">
-            <Button variant="outline" size="sm" className="gap-2">
-              Learn how it works
-            </Button>
-          </Link>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="ar-section ar-bg-hero">
+        <div className="ar-section__inner text-center">
+          <div className="ar-fade-in">
+            <h1 className="mb-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Craft Events
+            </h1>
+            <p className="mb-6 text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+              The free Doodle alternative. No ads, no sign-ups, no data
+              collection.
+            </p>
+            <Link href="/how-it-works">
+              <Button variant="outline" size="sm" className="gap-2">
+                Learn how it works
+              </Button>
+            </Link>
+          </div>
         </div>
+      </section>
 
-        <div className="mb-8 sm:mb-10">
-          <StepIndicator currentStep={currentStep} />
-        </div>
+      {/* Main Form Section */}
+      <section className="ar-section">
+        <div className="ar-section__inner">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8 sm:mb-10 ar-fade-in ar-delay-1">
+              <StepIndicator currentStep={currentStep} />
+            </div>
 
-        <div className="space-y-10 sm:space-y-12">
-          {process.env.NODE_ENV === "development" && <TimezoneTester />}
-          <AnimatePresence mode="wait">
-            {!encryptedBlob ? (
-              <motion.div
-                key="step-0"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-                className="space-y-10 sm:space-y-12"
-              >
-                <UrlForm onSubmit={handleUrlSubmit} />
-                {eventHistory.length > 0 && (
-                  <Card className="shadow-lg border-border/50">
-                    <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:justify-between sm:items-center">
-                      <CardTitle className="text-lg font-semibold text-foreground">
-                        Previously accessed events
-                      </CardTitle>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setHistoryVisible((prev) => !prev)}
-                        className="self-start sm:self-auto"
-                      >
-                        {historyVisible ? "Hide history" : "Show history"}
-                      </Button>
-                    </CardHeader>
-                    {historyVisible && (
-                      <CardContent className="pt-0 space-y-3">
-                        {eventHistory.map((entry) => (
-                          <div
-                            key={entry.blockId}
-                            className="flex flex-col gap-3 p-4 rounded-lg border transition-all group border-border hover:border-accent/50 hover:shadow-sm bg-card/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="mb-1 text-sm font-semibold truncate text-foreground">
-                                {entry.title}
-                              </p>
-                              <p className="text-xs leading-5 text-muted-foreground">
-                                {entry.documentTitle
-                                  ? `${entry.documentTitle} · `
-                                  : ""}
-                                {new Date(entry.createdAt).toLocaleString()}
-                              </p>
-                            </div>
-                            <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:shrink-0">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => router.push(entry.resultsUrl)}
-                                className="flex-1 sm:flex-none"
-                              >
-                                View results
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => router.push(entry.voteUrl)}
-                                className="flex-1 sm:flex-none"
-                              >
-                                Open voting
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </CardContent>
+            <div className="space-y-10 sm:space-y-12">
+              {process.env.NODE_ENV === "development" && <TimezoneTester />}
+              <AnimatePresence mode="wait">
+                {!encryptedBlob ? (
+                  <motion.div
+                    key="step-0"
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25 }}
+                    className="space-y-10 sm:space-y-12"
+                  >
+                    <div className="ar-fade-in ar-delay-2">
+                      <ConnectionPicker
+                        onConnectionReady={handleConnectionReady}
+                      />
+                    </div>
+                    {eventHistory.length > 0 && (
+                      <div className="ar-fade-in ar-delay-3">
+                        <Card className="shadow-lg border-border/50">
+                          <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:justify-between sm:items-center">
+                            <CardTitle className="text-lg font-semibold text-foreground">
+                              Previously accessed events
+                            </CardTitle>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setHistoryVisible((prev) => !prev)}
+                              className="self-start sm:self-auto"
+                            >
+                              {historyVisible ? "Hide history" : "Show history"}
+                            </Button>
+                          </CardHeader>
+                          {historyVisible && (
+                            <CardContent className="pt-0 space-y-3">
+                              {eventHistory.map((entry) => (
+                                <div
+                                  key={entry.blockId}
+                                  className="flex flex-col gap-3 p-4 rounded-lg border transition-all group border-border hover:border-accent/50 hover:shadow-sm bg-card/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <p className="mb-1 text-sm font-semibold truncate text-foreground">
+                                      {entry.title}
+                                    </p>
+                                    <p className="text-xs leading-5 text-muted-foreground">
+                                      {entry.documentTitle
+                                        ? `${entry.documentTitle} · `
+                                        : ""}
+                                      {new Date(entry.createdAt).toLocaleString()}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:shrink-0">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => router.push(entry.resultsUrl)}
+                                      className="flex-1 sm:flex-none"
+                                    >
+                                      View results
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => router.push(entry.voteUrl)}
+                                      className="flex-1 sm:flex-none"
+                                    >
+                                      Open voting
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </CardContent>
+                          )}
+                        </Card>
+                      </div>
                     )}
-                  </Card>
+                  </motion.div>
+                ) : !selectedDocument ? (
+                  <motion.div
+                    key="step-1"
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25 }}
+                    className="space-y-4"
+                  >
+                    {currentConnection && (
+                      <ConnectionInfoBar
+                        connectionName={currentConnection.name}
+                        onChangeConnection={handleReset}
+                      />
+                    )}
+                    <DocumentSelector
+                      encryptedBlob={encryptedBlob}
+                      connectionType={currentConnection?.type}
+                      onSelect={handleDocumentSelect}
+                      onBack={handleReset}
+                      onChangeConnection={handleReset}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="step-2"
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.25 }}
+                    className="space-y-10 sm:space-y-12"
+                  >
+                    {currentConnection && (
+                      <ConnectionInfoBar
+                        connectionName={currentConnection.name}
+                        documentTitle={selectedDocument.title}
+                        onChangeConnection={handleReset}
+                        onChangeDocument={handleBackToDocuments}
+                      />
+                    )}
+
+                    <EventForm
+                      documentTitle={selectedDocument.title}
+                      onSubmit={handleEventSubmit}
+                      onBack={handleBackToDocuments}
+                    />
+
+                    <AnimatePresence mode="wait">
+                      {isInserting && (
+                        <motion.div
+                          key="creating"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          aria-live="polite"
+                          className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
+                        >
+                          <LoaderCircle className="w-4 h-4 animate-spin" />
+                          Creating a new event page...
+                        </motion.div>
+                      )}
+
+                      {successUrl && (
+                        <motion.div
+                          key="success"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                          className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
+                        >
+                          <CircleCheck className="w-5 h-5" />
+                          Event created!
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {insertError && (
+                      <div className="p-4 text-sm text-center rounded-lg border shadow-sm text-destructive-foreground bg-destructive/90 border-destructive/50">
+                        {insertError}
+                      </div>
+                    )}
+                  </motion.div>
                 )}
-              </motion.div>
-            ) : !selectedDocument ? (
-              <motion.div
-                key="step-1"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-              >
-                <DocumentSelector
-                  encryptedBlob={encryptedBlob}
-                  onSelect={handleDocumentSelect}
-                  onBack={handleReset}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="step-2"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-                className="space-y-10 sm:space-y-12"
-              >
-                <EventForm
-                  documentTitle={selectedDocument.title}
-                  onSubmit={handleEventSubmit}
-                  onBack={() => {
-                    setSelectedDocument(null);
-                    setInsertError(null);
-                  }}
-                />
-
-                <AnimatePresence mode="wait">
-                  {isInserting && (
-                    <motion.div
-                      key="creating"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      aria-live="polite"
-                      className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
-                    >
-                      <LoaderCircle className="w-4 h-4 animate-spin" />
-                      Creating a new event page...
-                    </motion.div>
-                  )}
-
-                  {successUrl && (
-                    <motion.div
-                      key="success"
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
-                    >
-                      <CircleCheck className="w-5 h-5" />
-                      Event created!
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {insertError && (
-                  <div className="p-4 text-sm text-center rounded-lg border shadow-sm text-destructive-foreground bg-destructive/90 border-destructive/50">
-                    {insertError}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+    </div>
+  );
+}
+
+// -- Connection Info Bar --
+
+function ConnectionInfoBar({
+  connectionName,
+  documentTitle,
+  onChangeConnection,
+  onChangeDocument,
+}: {
+  connectionName: string;
+  documentTitle?: string;
+  onChangeConnection: () => void;
+  onChangeDocument?: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground rounded-lg border border-border/50 px-4 py-2.5 bg-card/50">
+      <span className="font-medium text-foreground truncate">
+        {connectionName}
+      </span>
+      {documentTitle && (
+        <>
+          <span className="text-muted-foreground/50">›</span>
+          <span className="truncate">{documentTitle}</span>
+          {onChangeDocument && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto h-7 text-xs shrink-0"
+              onClick={onChangeDocument}
+            >
+              Change document
+            </Button>
+          )}
+        </>
+      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-7 text-xs shrink-0 ${documentTitle ? "" : "ml-auto"}`}
+        onClick={onChangeConnection}
+      >
+        <ArrowLeft className="mr-1 h-3 w-3" />
+        Change
+      </Button>
     </div>
   );
 }
