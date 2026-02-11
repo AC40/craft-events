@@ -11,6 +11,7 @@ import { updateTableWithVote, tableToMarkdown } from "@/lib/tableParser";
 import VotingForm from "@/components/votingForm";
 import { useEventTable } from "@/lib/useEventTable";
 import { addEventToHistory } from "@/lib/eventHistory";
+import { sanitizeInput, MAX_LENGTHS } from "@/lib/sanitize";
 
 export default function EventView() {
   const params = useParams();
@@ -66,7 +67,8 @@ export default function EventView() {
         throw new Error("Missing required data");
       }
 
-      const updatedTable = updateTableWithVote(table, name, votes);
+      const safeName = sanitizeInput(name, MAX_LENGTHS.participantName);
+      const updatedTable = updateTableWithVote(table, safeName, votes);
       const newMarkdown = tableToMarkdown(updatedTable);
       await modifyBlock(encryptedBlob, blockId, newMarkdown);
 
@@ -118,7 +120,7 @@ export default function EventView() {
                   ? error.message
                   : "Failed to load event"}
               </div>
-              {block && (
+              {process.env.NODE_ENV === "development" && block && (
                 <div className="mt-4 text-xs text-muted-foreground">
                   <pre>{JSON.stringify(block, null, 2)}</pre>
                 </div>
@@ -139,7 +141,7 @@ export default function EventView() {
               <p className="text-center text-muted-foreground mb-4">
                 No table data found
               </p>
-              {markdown && (
+              {process.env.NODE_ENV === "development" && markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p className="mb-2">Markdown found:</p>
                   <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
@@ -147,7 +149,7 @@ export default function EventView() {
                   </pre>
                 </div>
               )}
-              {!markdown && (
+              {process.env.NODE_ENV === "development" && !markdown && (
                 <div className="text-xs text-muted-foreground">
                   <p>Block structure:</p>
                   <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
@@ -171,24 +173,26 @@ export default function EventView() {
               <p className="text-center text-muted-foreground mb-4">
                 No time slots found in table
               </p>
-              <div className="text-xs text-muted-foreground">
-                <p className="mb-2">Table headers:</p>
-                <pre className="bg-secondary p-2 rounded overflow-auto">
-                  {JSON.stringify(table.headers, null, 2)}
-                </pre>
-                <p className="mb-2 mt-4">Table rows:</p>
-                <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
-                  {JSON.stringify(table.rows, null, 2)}
-                </pre>
-                {markdown && (
-                  <>
-                    <p className="mb-2 mt-4">Raw markdown:</p>
-                    <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
-                      {markdown}
-                    </pre>
-                  </>
-                )}
-              </div>
+              {process.env.NODE_ENV === "development" && (
+                <div className="text-xs text-muted-foreground">
+                  <p className="mb-2">Table headers:</p>
+                  <pre className="bg-secondary p-2 rounded overflow-auto">
+                    {JSON.stringify(table.headers, null, 2)}
+                  </pre>
+                  <p className="mb-2 mt-4">Table rows:</p>
+                  <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                    {JSON.stringify(table.rows, null, 2)}
+                  </pre>
+                  {markdown && (
+                    <>
+                      <p className="mb-2 mt-4">Raw markdown:</p>
+                      <pre className="bg-secondary p-2 rounded overflow-auto max-h-96 overflow-y-auto">
+                        {markdown}
+                      </pre>
+                    </>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

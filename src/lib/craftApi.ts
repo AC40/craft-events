@@ -11,7 +11,11 @@ export interface DocumentsResponse {
 export function normalizeApiUrl(url: string): string {
   let normalized = url.trim();
 
-  if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {
+  if (normalized.startsWith("http://")) {
+    throw new Error("HTTP URLs are not allowed — use HTTPS for secure communication");
+  }
+
+  if (!normalized.startsWith("https://")) {
     normalized = `https://${normalized}`;
   }
 
@@ -81,36 +85,11 @@ export async function insertBlocks(
 
   const url = `${apiUrl}/blocks`;
 
-  // Log request details (excluding sensitive API key)
-  console.log("[insertBlocks] Request details:", {
-    url,
-    method: "POST",
-    documentId,
-    blocksCount: blocks.length,
-    blocks: blocks.map((b) => ({
-      type: b.type,
-      hasMarkdown: !!b.markdown,
-      markdownLength: b.markdown?.length || 0,
-      hasContent: !!b.content,
-      contentLength: b.content?.length || 0,
-      textStyle: (b as { textStyle?: string }).textStyle,
-    })),
-    hasApiKey: !!apiKey,
-  });
-
   try {
     const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-    });
-
-    // Log response status
-    console.log("[insertBlocks] Response status:", {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      headers: Object.fromEntries(response.headers.entries()),
     });
 
     if (!response.ok) {
@@ -123,17 +102,9 @@ export async function insertBlocks(
         } else {
           errorBody = await response.text();
         }
-      } catch (e) {
-        console.error("[insertBlocks] Failed to read error response body:", e);
+      } catch {
+        // Could not read error response body
       }
-
-      console.error("[insertBlocks] Error details:", {
-        status: response.status,
-        statusText: response.statusText,
-        errorBody,
-        requestUrl: url,
-        requestBody: JSON.stringify(requestBody, null, 2),
-      });
 
       throw new Error(
         `Failed to insert blocks: ${response.status} ${response.statusText}${
@@ -143,23 +114,8 @@ export async function insertBlocks(
     }
 
     const result = await response.json();
-    console.log("[insertBlocks] Success:", {
-      itemsCount: result.items?.length || 0,
-      items: result.items?.map((item: { id: string; type: string }) => ({
-        id: item.id,
-        type: item.type,
-      })),
-    });
-
     return result;
   } catch (error) {
-    console.error("[insertBlocks] Exception:", {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      url,
-      documentId,
-      blocksCount: blocks.length,
-    });
     throw error;
   }
 }

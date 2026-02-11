@@ -18,6 +18,7 @@ import {
 import type { CraftDocument } from "@/lib/craftApi";
 import type { EventFormData } from "@/components/eventForm";
 import TimezoneTester from "@/components/timezoneTester";
+import { sanitizeInput, MAX_LENGTHS } from "@/lib/sanitize";
 
 export default function Home() {
   const router = useRouter();
@@ -73,7 +74,11 @@ export default function Home() {
 
       const { formatTableHeader } = await import("@/lib/tableParser");
 
-      const pageTitle = `${eventTitle} – Scheduling`;
+      const safeTitle = sanitizeInput(eventTitle, MAX_LENGTHS.title);
+      const safeDescription = sanitizeInput(description, MAX_LENGTHS.description);
+      const safeLocation = sanitizeInput(location, MAX_LENGTHS.location);
+
+      const pageTitle = `${safeTitle} – Scheduling`;
       const pageBlock = {
         type: "text",
         textStyle: "page",
@@ -93,17 +98,17 @@ export default function Home() {
         textStyle?: string;
       }> = [];
 
-      if (description) {
+      if (safeDescription) {
         blocks.push({
           type: "text",
-          markdown: `📝 ${description}`,
+          markdown: `📝 ${safeDescription}`,
         });
       }
 
-      if (location) {
+      if (safeLocation) {
         blocks.push({
           type: "text",
-          markdown: `📍 ${location}`,
+          markdown: `📍 ${safeLocation}`,
         });
       }
 
@@ -239,7 +244,7 @@ export default function Home() {
         </div>
 
         <div className="space-y-10 sm:space-y-12">
-          <TimezoneTester />
+          {process.env.NODE_ENV === "development" && <TimezoneTester />}
           {!encryptedBlob ? (
             <>
               <UrlForm onSubmit={handleUrlSubmit} />

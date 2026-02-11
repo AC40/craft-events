@@ -10,6 +10,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import ConfirmDialog from "./confirmDialog";
+import { MAX_LENGTHS } from "@/lib/sanitize";
 
 export interface TimeSlot {
   date: Date;
@@ -360,6 +361,7 @@ export default function EventForm({
                 placeholder="Enter event title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                maxLength={MAX_LENGTHS.title}
                 required
               />
             </div>
@@ -372,6 +374,7 @@ export default function EventForm({
                 placeholder="Enter event description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                maxLength={MAX_LENGTHS.description}
               />
             </div>
 
@@ -383,6 +386,7 @@ export default function EventForm({
                 placeholder="Enter event location"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                maxLength={MAX_LENGTHS.location}
               />
             </div>
 

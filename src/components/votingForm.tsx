@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import ConfirmDialog from "./confirmDialog";
+import { MAX_LENGTHS } from "@/lib/sanitize";
 import type { ParsedTable } from "@/lib/tableParser";
 import {
   formatDateInTimezone,
@@ -114,6 +115,7 @@ export default function VotingForm({
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                maxLength={MAX_LENGTHS.participantName}
                 required
               />
             </div>
@@ -123,7 +125,7 @@ export default function VotingForm({
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {timeSlots.map((slot, index) => (
                   <button
-                    key={index}
+                    key={slot.date.toISOString()}
                     type="button"
                     onClick={() => toggleVote(index)}
                     className={`

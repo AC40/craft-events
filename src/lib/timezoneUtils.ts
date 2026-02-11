@@ -2,6 +2,15 @@
  * Utility functions for timezone handling, including test overrides
  */
 
+function isValidTimezone(tz: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Gets the current timezone, with support for testing overrides
  * Checks in order:
@@ -14,21 +23,13 @@ export function getCurrentTimezone(): string {
   if (typeof window !== "undefined") {
     const urlParams = new URLSearchParams(window.location.search);
     const tzParam = urlParams.get("tz");
-    if (tzParam) {
-      console.log(
-        "[timezoneUtils] Using timezone from query parameter:",
-        tzParam
-      );
+    if (tzParam && isValidTimezone(tzParam)) {
       return tzParam;
     }
 
     // Check localStorage (for persistent testing)
     const storedTz = localStorage.getItem("craft-events-test-timezone");
-    if (storedTz) {
-      console.log(
-        "[timezoneUtils] Using timezone from localStorage:",
-        storedTz
-      );
+    if (storedTz && isValidTimezone(storedTz)) {
       return storedTz;
     }
   }
@@ -50,12 +51,8 @@ export function setTestTimezone(timezone: string | null): void {
 
   if (timezone) {
     localStorage.setItem("craft-events-test-timezone", timezone);
-    console.log("[timezoneUtils] Test timezone set to:", timezone);
-    console.log("[timezoneUtils] Reload the page to apply the change");
   } else {
     localStorage.removeItem("craft-events-test-timezone");
-    console.log("[timezoneUtils] Test timezone cleared");
-    console.log("[timezoneUtils] Reload the page to apply the change");
   }
 }
 

@@ -3,13 +3,19 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getBlock } from "@/app/actions";
+import type { Block } from "@/lib/craftApi";
 import {
   parseMarkdownTable,
   parseTableToTimeSlots,
   extractTimezone,
 } from "@/lib/tableParser";
 
-const extractMarkdownFromBlock = (block: any): string | null => {
+/** Block shape as returned by the Craft API (may include nested `blocks` array) */
+interface CraftBlock extends Block {
+  blocks?: CraftBlock[];
+}
+
+const extractMarkdownFromBlock = (block: CraftBlock): string | null => {
   if (block?.markdown) {
     return block.markdown;
   }
@@ -21,7 +27,7 @@ const extractMarkdownFromBlock = (block: any): string | null => {
     Array.isArray(block.content) &&
     block.content.length > 0
   ) {
-    return extractMarkdownFromBlock(block.content[0]);
+    return extractMarkdownFromBlock(block.content[0] as CraftBlock);
   }
   return null;
 };
@@ -29,7 +35,7 @@ const extractMarkdownFromBlock = (block: any): string | null => {
 /**
  * Extracts all markdown from sibling blocks (for finding timezone metadata)
  */
-const extractAllMarkdownFromBlocks = (blocks: any[]): string[] => {
+const extractAllMarkdownFromBlocks = (blocks: CraftBlock[]): string[] => {
   const markdowns: string[] = [];
   for (const block of blocks) {
     const md = extractMarkdownFromBlock(block);
@@ -53,7 +59,7 @@ const extractAllMarkdownFromBlocks = (blocks: any[]): string[] => {
 async function getParentPageBlock(
   blockId: string,
   encryptedBlob: string
-): Promise<any | null> {
+): Promise<CraftBlock | null> {
   try {
     // Fetch the block with depth 1 to get parent info
     const block = await getBlock(encryptedBlob, blockId, 1);
@@ -62,8 +68,7 @@ async function getParentPageBlock(
     // Otherwise, we need to fetch the page that contains this block
     // For now, we'll check if the block structure includes parent/sibling info
     return block;
-  } catch (error) {
-    console.error("[useEventTable] Failed to fetch parent block:", error);
+  } catch {
     return null;
   }
 }
@@ -75,13 +80,10 @@ export function useEventTable(blockId?: string, encryptedBlob?: string) {
       if (!blockId || !encryptedBlob) {
         throw new Error("Missing block identifier or encrypted blob");
       }
-      // Fetch the table block
-      const tableBlock = await getBlock(encryptedBlob, blockId, 0);
-
-      // Fetch with depth 1 to get parent page and sibling blocks (timezone is stored before table)
+      // Single fetch with depth 1 — includes table markdown and sibling context (timezone block)
       const blockWithContext = await getBlock(encryptedBlob, blockId, 1);
 
-      return { tableBlock, blockWithContext };
+      return { tableBlock: blockWithContext, blockWithContext };
     },
     enabled: !!blockId && !!encryptedBlob,
   });

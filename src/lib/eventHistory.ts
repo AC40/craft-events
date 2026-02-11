@@ -36,7 +36,8 @@ function writeCookie(name: string, value: string) {
     return;
   }
 
-  document.cookie = `${name}=${value};path=/;max-age=${COOKIE_MAX_AGE};sameSite=Lax`;
+  const isSecure = window.location.protocol === "https:";
+  document.cookie = `${name}=${value};path=/;max-age=${COOKIE_MAX_AGE};sameSite=Lax${isSecure ? ";Secure" : ""}`;
 }
 
 export function loadEventHistory(): EventHistoryEntry[] {

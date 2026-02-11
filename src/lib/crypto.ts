@@ -140,5 +140,9 @@ export async function decrypt(
     encryptedBuffer
   );
 
-  return JSON.parse(new TextDecoder().decode(decrypted));
+  try {
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch {
+    throw new Error("Failed to decrypt credentials — data may be corrupt or the master key may have changed");
+  }
 }

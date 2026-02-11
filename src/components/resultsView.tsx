@@ -68,7 +68,7 @@ export default function ResultsView({
                   Participants
                 </div>
                 {timeSlots.map((slot, index) => (
-                  <div key={index} className="p-2 text-center">
+                  <div key={slot.date.toISOString()} className="p-2 text-center">
                     <div className="mb-1 text-sm font-semibold">
                       {formatDate(slot.date)}
                     </div>
@@ -83,9 +83,9 @@ export default function ResultsView({
               </div>
 
               <div className="space-y-1">
-                {table.rows.map((row, rowIndex) => (
+                {table.rows.map((row) => (
                   <div
-                    key={rowIndex}
+                    key={row.cells[0]?.value || crypto.randomUUID()}
                     className="grid gap-2 items-center py-3 border-b hover:bg-secondary"
                     style={{
                       gridTemplateColumns: `200px repeat(${timeSlots.length}, minmax(150px, 1fr))`,
@@ -102,7 +102,7 @@ export default function ResultsView({
                       const cellValue = row.cells[cellIndex]?.value || "";
                       const isAvailable = cellValue.trim() === "✅";
                       return (
-                        <div key={slotIndex} className="p-2 text-center">
+                        <div key={slot.date.toISOString()} className="p-2 text-center">
                           {isAvailable ? (
                             <span className="text-xl font-bold text-green-600">
                               ✓
