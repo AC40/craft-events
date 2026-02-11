@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
+import { LoaderCircle, CircleCheck } from "lucide-react";
 import UrlForm from "@/components/urlForm";
 import DocumentSelector from "@/components/documentSelector";
 import EventForm from "@/components/eventForm";
+import StepIndicator from "@/components/stepIndicator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { encryptSecrets, createBlocks } from "@/app/actions";
@@ -29,9 +32,14 @@ export default function Home() {
   const [insertError, setInsertError] = useState<string | null>(null);
   const [eventHistory, setEventHistory] = useState<EventHistoryEntry[]>([]);
   const [historyVisible, setHistoryVisible] = useState(true);
+  const [successUrl, setSuccessUrl] = useState<string | null>(null);
+  const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setEventHistory(loadEventHistory());
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
+    };
   }, []);
 
   const handleUrlSubmit = async (url: string, key?: string) => {
@@ -209,7 +217,11 @@ export default function Home() {
         createdAt: Date.now(),
       });
       setEventHistory(history);
-      router.push(result.resultsUrl);
+      setIsInserting(false);
+      setSuccessUrl(result.resultsUrl);
+      redirectTimer.current = setTimeout(() => {
+        router.push(result.resultsUrl);
+      }, 1200);
     } catch (error) {
       setInsertError(
         error instanceof Error ? error.message : "Failed to create event"
@@ -223,6 +235,15 @@ export default function Home() {
     setEncryptedBlob(null);
     setSelectedDocument(null);
     setInsertError(null);
+    setSuccessUrl(null);
+  };
+
+  const currentStep = !encryptedBlob ? 0 : !selectedDocument ? 1 : 2;
+
+  const stepVariants = {
+    enter: { opacity: 0, x: 30 },
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -30 },
   };
 
   return (
@@ -243,103 +264,153 @@ export default function Home() {
           </Link>
         </div>
 
+        <div className="mb-8 sm:mb-10">
+          <StepIndicator currentStep={currentStep} />
+        </div>
+
         <div className="space-y-10 sm:space-y-12">
           {process.env.NODE_ENV === "development" && <TimezoneTester />}
-          {!encryptedBlob ? (
-            <>
-              <UrlForm onSubmit={handleUrlSubmit} />
-              {eventHistory.length > 0 && (
-                <Card className="shadow-lg border-border/50">
-                  <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:justify-between sm:items-center">
-                    <CardTitle className="text-lg font-semibold text-foreground">
-                      Previously accessed events
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setHistoryVisible((prev) => !prev)}
-                      className="self-start sm:self-auto"
+          <AnimatePresence mode="wait">
+            {!encryptedBlob ? (
+              <motion.div
+                key="step-0"
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25 }}
+                className="space-y-10 sm:space-y-12"
+              >
+                <UrlForm onSubmit={handleUrlSubmit} />
+                {eventHistory.length > 0 && (
+                  <Card className="shadow-lg border-border/50">
+                    <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:justify-between sm:items-center">
+                      <CardTitle className="text-lg font-semibold text-foreground">
+                        Previously accessed events
+                      </CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setHistoryVisible((prev) => !prev)}
+                        className="self-start sm:self-auto"
+                      >
+                        {historyVisible ? "Hide history" : "Show history"}
+                      </Button>
+                    </CardHeader>
+                    {historyVisible && (
+                      <CardContent className="pt-0 space-y-3">
+                        {eventHistory.map((entry) => (
+                          <div
+                            key={entry.blockId}
+                            className="flex flex-col gap-3 p-4 rounded-lg border transition-all group border-border hover:border-accent/50 hover:shadow-sm bg-card/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="mb-1 text-sm font-semibold truncate text-foreground">
+                                {entry.title}
+                              </p>
+                              <p className="text-xs leading-5 text-muted-foreground">
+                                {entry.documentTitle
+                                  ? `${entry.documentTitle} · `
+                                  : ""}
+                                {new Date(entry.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:shrink-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.push(entry.resultsUrl)}
+                                className="flex-1 sm:flex-none"
+                              >
+                                View results
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => router.push(entry.voteUrl)}
+                                className="flex-1 sm:flex-none"
+                              >
+                                Open voting
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
+              </motion.div>
+            ) : !selectedDocument ? (
+              <motion.div
+                key="step-1"
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25 }}
+              >
+                <DocumentSelector
+                  encryptedBlob={encryptedBlob}
+                  onSelect={handleDocumentSelect}
+                  onBack={handleReset}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="step-2"
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25 }}
+                className="space-y-10 sm:space-y-12"
+              >
+                <EventForm
+                  documentTitle={selectedDocument.title}
+                  onSubmit={handleEventSubmit}
+                  onBack={() => {
+                    setSelectedDocument(null);
+                    setInsertError(null);
+                  }}
+                />
+
+                <AnimatePresence mode="wait">
+                  {isInserting && (
+                    <motion.div
+                      key="creating"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      aria-live="polite"
+                      className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
                     >
-                      {historyVisible ? "Hide history" : "Show history"}
-                    </Button>
-                  </CardHeader>
-                  {historyVisible && (
-                    <CardContent className="pt-0 space-y-3">
-                      {eventHistory.map((entry) => (
-                        <div
-                          key={entry.blockId}
-                          className="flex flex-col gap-3 p-4 rounded-lg border transition-all group border-border hover:border-accent/50 hover:shadow-sm bg-card/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="mb-1 text-sm font-semibold truncate text-foreground">
-                              {entry.title}
-                            </p>
-                            <p className="text-xs leading-5 text-muted-foreground">
-                              {entry.documentTitle
-                                ? `${entry.documentTitle} · `
-                                : ""}
-                              {new Date(entry.createdAt).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => router.push(entry.resultsUrl)}
-                              className="flex-1 sm:flex-none"
-                            >
-                              View results
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => router.push(entry.voteUrl)}
-                              className="flex-1 sm:flex-none"
-                            >
-                              Open voting
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
+                      <LoaderCircle className="w-4 h-4 animate-spin" />
+                      Creating a new event page...
+                    </motion.div>
                   )}
-                </Card>
-              )}
-            </>
-          ) : !selectedDocument ? (
-            <DocumentSelector
-              encryptedBlob={encryptedBlob}
-              onSelect={handleDocumentSelect}
-              onBack={handleReset}
-            />
-          ) : (
-            <>
-              <EventForm
-                documentTitle={selectedDocument.title}
-                onSubmit={handleEventSubmit}
-                onBack={() => {
-                  setSelectedDocument(null);
-                  setInsertError(null);
-                }}
-              />
 
-              {isInserting && (
-                <div
-                  aria-live="polite"
-                  className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
-                >
-                  <span className="w-2 h-2 rounded-full animate-pulse bg-accent-foreground" />
-                  Creating a new event page...
-                </div>
-              )}
+                  {successUrl && (
+                    <motion.div
+                      key="success"
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                      className="flex gap-3 justify-center items-center px-5 py-3 text-sm font-medium rounded-lg border shadow-sm text-accent-foreground bg-accent/50 border-accent/50"
+                    >
+                      <CircleCheck className="w-5 h-5" />
+                      Event created!
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-              {insertError && (
-                <div className="p-4 text-sm text-center rounded-lg border shadow-sm text-destructive-foreground bg-destructive/90 border-destructive/50">
-                  {insertError}
-                </div>
-              )}
-            </>
-          )}
+                {insertError && (
+                  <div className="p-4 text-sm text-center rounded-lg border shadow-sm text-destructive-foreground bg-destructive/90 border-destructive/50">
+                    {insertError}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

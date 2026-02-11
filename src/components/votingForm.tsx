@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -17,6 +18,8 @@ import {
   formatTimeInTimezone,
   getLocalTimeString,
 } from "@/lib/tableParser";
+
+const MotionButton = motion.create(Button);
 
 interface VotingFormProps {
   table: ParsedTable;
@@ -124,10 +127,11 @@ export default function VotingForm({
               <Label>Select Available Time Slots</Label>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {timeSlots.map((slot, index) => (
-                  <button
+                  <motion.button
                     key={slot.date.toISOString()}
                     type="button"
                     onClick={() => toggleVote(index)}
+                    whileTap={{ scale: 0.97 }}
                     className={`
                     p-4 rounded-lg border-2 transition-all text-left min-h-[100px] flex flex-col justify-between
                     ${
@@ -143,25 +147,37 @@ export default function VotingForm({
                         {formatTime(slot.date)}
                       </div>
                     </div>
-                    <div
-                      className={`mt-2 font-bold text-accent ${
-                        votes[index] ? "" : "invisible"
-                      }`}
-                    >
-                      ✓ Available
-                    </div>
-                  </button>
+                    <AnimatePresence>
+                      {votes[index] && (
+                        <motion.div
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                          className="mt-2 font-bold text-accent"
+                        >
+                          ✓ Available
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    {!votes[index] && (
+                      <div className="mt-2 invisible font-bold">
+                        ✓ Available
+                      </div>
+                    )}
+                  </motion.button>
                 ))}
               </div>
             </div>
 
-            <Button
+            <MotionButton
               type="submit"
               className="w-full"
               disabled={isSubmitting || !name.trim()}
+              whileTap={{ scale: 0.97 }}
             >
               {isSubmitting ? "Submitting..." : "Submit Vote"}
-            </Button>
+            </MotionButton>
           </form>
         </CardContent>
       </Card>

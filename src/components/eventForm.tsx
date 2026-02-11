@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -472,10 +473,11 @@ export default function EventForm({
                               );
 
                             return (
-                              <button
+                              <motion.button
                                 key={`${dateKey}-${hour}`}
                                 type="button"
                                 onClick={() => toggleTimeSlot(slot.index)}
+                                whileTap={{ scale: 0.92 }}
                                 className={`
                               p-2 m-1 rounded border transition-colors min-h-[40px] flex items-center justify-center
                               ${
@@ -490,7 +492,7 @@ export default function EventForm({
                                 >
                                   ✓
                                 </span>
-                              </button>
+                              </motion.button>
                             );
                           })}
                         </div>

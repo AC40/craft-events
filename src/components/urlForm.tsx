@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -10,6 +11,8 @@ import {
   CardTitle,
 } from "./ui/card";
 import { normalizeApiUrl } from "@/lib/craftApi";
+
+const MotionButton = motion.create(Button);
 
 interface UrlFormProps {
   onSubmit: (apiUrl: string, apiKey?: string) => Promise<void>;
@@ -88,14 +91,15 @@ export default function UrlForm({ onSubmit }: UrlFormProps) {
             </div>
           )}
 
-          <Button 
-            type="submit" 
-            className="w-full h-11 font-medium" 
+          <MotionButton
+            type="submit"
+            className="w-full h-11 font-medium"
             disabled={isSubmitting}
             size="lg"
+            whileTap={{ scale: 0.97 }}
           >
             {isSubmitting ? "Connecting..." : "Connect"}
-          </Button>
+          </MotionButton>
         </form>
       </CardContent>
     </Card>

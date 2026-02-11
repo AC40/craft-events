@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import { Skeleton } from "./ui/skeleton";
 import { getDocuments } from "@/app/actions";
 import type { CraftDocument } from "@/lib/craftApi";
 
@@ -29,10 +30,16 @@ export default function DocumentSelector({
   if (isLoading) {
     return (
       <Card className="w-full max-w-md mx-auto">
-        <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">
-            Loading documents...
-          </p>
+        <CardHeader>
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
         </CardContent>
       </Card>
     );

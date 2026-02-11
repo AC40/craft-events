@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { modifyBlock } from "@/app/actions";
 import { updateTableWithVote, tableToMarkdown } from "@/lib/tableParser";
 import VotingForm from "@/components/votingForm";
 import { useEventTable } from "@/lib/useEventTable";
 import { addEventToHistory } from "@/lib/eventHistory";
 import { sanitizeInput, MAX_LENGTHS } from "@/lib/sanitize";
+import { toast } from "sonner";
+
+const MotionButton = motion.create(Button);
 
 export default function EventView() {
   const params = useParams();
@@ -78,11 +83,14 @@ export default function EventView() {
       queryClient.invalidateQueries({
         queryKey: ["event_block", blockId, encryptedBlob],
       });
-      router.push(
-        `/event/${blockId}/results?blob=${encodeURIComponent(
-          encryptedBlob || ""
-        )}&title=${encodeURIComponent(eventTitle)}`
-      );
+      toast.success("Vote submitted!");
+      setTimeout(() => {
+        router.push(
+          `/event/${blockId}/results?blob=${encodeURIComponent(
+            encryptedBlob || ""
+          )}&title=${encodeURIComponent(eventTitle)}`
+        );
+      }, 800);
     },
   });
 
@@ -96,12 +104,24 @@ export default function EventView() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto max-w-6xl space-y-6">
+          <div className="space-y-1">
+            <Skeleton className="h-9 w-32 mb-2" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-64" />
+          </div>
           <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-muted-foreground">
-                Loading event...
-              </p>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[100px] w-full rounded-lg" />
+                ))}
+              </div>
+              <Skeleton className="h-11 w-full" />
             </CardContent>
           </Card>
         </div>

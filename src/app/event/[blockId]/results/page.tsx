@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import ResultsView from "@/components/resultsView";
 import { useEventTable } from "@/lib/useEventTable";
 import { addEventToHistory } from "@/lib/eventHistory";
@@ -98,12 +99,35 @@ export default function EventResultsPage() {
   if (isLoading) {
     return (
       <div className="p-8 min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto space-y-6 max-w-6xl">
+          <div className="space-y-1">
+            <Skeleton className="h-9 w-32 mb-2" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-64" />
+          </div>
           <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-muted-foreground">
-                Loading results...
-              </p>
+            <CardContent className="p-6 space-y-6">
+              {/* Column headers */}
+              <div className="flex gap-4">
+                <Skeleton className="h-6 w-[200px]" />
+                <Skeleton className="h-6 flex-1" />
+                <Skeleton className="h-6 flex-1" />
+                <Skeleton className="h-6 flex-1" />
+                <Skeleton className="h-6 flex-1" />
+              </div>
+              {/* Participant rows */}
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex gap-4 items-center">
+                  <div className="flex gap-2 items-center w-[200px]">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-6 flex-1" />
+                  <Skeleton className="h-6 flex-1" />
+                  <Skeleton className="h-6 flex-1" />
+                  <Skeleton className="h-6 flex-1" />
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
