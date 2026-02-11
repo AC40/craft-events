@@ -37,8 +37,4 @@
     @apply bg-background text-foreground;
     font-family: var(--ar-font-family);
   }
-
-  a:not([class*="text-"]):not([class*="button"]):not([class*="Button"]) {
-    @apply text-accent hover:text-accent/80 transition-colors;
-  }
 }

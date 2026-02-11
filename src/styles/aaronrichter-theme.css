@@ -1,25 +1,148 @@
 /*
-  aaronrichter.tech visual language
-  ---------------------------------
-  Drop this stylesheet into any project to inherit the same color system,
-  typography, and surface treatments used across aaronrichter.tech.
-*/
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  aaronrichter.tech — Standalone Visual Language
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Drop this single stylesheet into ANY project (React, Vue, Svelte, plain
+ *  HTML …) to replicate the full aaronrichter.tech look and feel.
+ *
+ *  Requires: nothing — fonts are loaded via Google Fonts import below.
+ *
+ *  Customise: change `--ar-theme-hue` on `:root` to shift the entire
+ *  palette. 200 = the default teal-blue, 280 = purple, 340 = pink, etc.
+ *
+ *  ─── Quick-start HTML template ────────────────────────────────────────
+ *
+ *  <!DOCTYPE html>
+ *  <html lang="en">
+ *  <head>
+ *    <meta charset="UTF-8" />
+ *    <meta name="viewport" content="width=device-width, initial-scale=1" />
+ *    <link rel="stylesheet" href="aaronrichter-theme.css" />
+ *    <title>My Page</title>
+ *  </head>
+ *  <body>
+ *    <header class="ar-header">
+ *      <a href="/" class="ar-header__name">Your Name</a>
+ *      <nav class="ar-header__contact">
+ *        <a href="mailto:hi@example.com">hi@example.com</a>
+ *        <a href="https://github.com">GitHub</a>
+ *      </nav>
+ *    </header>
+ *
+ *    <section class="ar-section ar-bg-hero">
+ *      <div class="ar-section__inner" style="text-align:center">
+ *        <h2>Full-Stack Developer</h2>
+ *        <div class="ar-flex-row" style="justify-content:center;flex-wrap:wrap;gap:0.5rem">
+ *          <button class="ar-tag">React</button>
+ *          <button class="ar-tag" aria-pressed="true">Svelte</button>
+ *          <button class="ar-tag">Astro</button>
+ *        </div>
+ *      </div>
+ *    </section>
+ *
+ *    <section class="ar-section">
+ *      <div class="ar-section__inner">
+ *        <div class="ar-post-grid">
+ *          <a href="#" class="ar-card">
+ *            <div>
+ *              <span class="ar-card__meta">Jan 2025</span>
+ *              <h2>Project Alpha</h2>
+ *              <p>A short description of the project.</p>
+ *            </div>
+ *            <div class="ar-card__tags"><span>React</span><span>TypeScript</span></div>
+ *          </a>
+ *          <!-- more cards … -->
+ *        </div>
+ *      </div>
+ *    </section>
+ *
+ *    <section class="ar-section">
+ *      <div class="ar-section__inner ar-prose">
+ *        <h1>Blog Post Title</h1>
+ *        <p>Long-form content goes here …</p>
+ *      </div>
+ *    </section>
+ *
+ *    <footer class="ar-footer">
+ *      <a href="/impressum">Impressum</a>
+ *      <a href="/datenschutz">Datenschutz</a>
+ *      <span class="ar-footer__badge">100% HANDMADE</span>
+ *    </footer>
+ *  </body>
+ *  </html>
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  1. FONT IMPORTS
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
 @import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap");
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  2. DESIGN TOKENS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  All visual decisions are expressed as CSS custom properties.
+ *  Change `--ar-theme-hue` to re-theme the entire palette in one move.
+ *
+ *  Spacing scale follows a 4px base (0.25rem):
+ *    --ar-space-1: 0.25rem   (4px)
+ *    --ar-space-2: 0.5rem    (8px)
+ *    --ar-space-4: 1rem      (16px)
+ *    --ar-space-8: 2rem      (32px)
+ *    --ar-space-16: 4rem     (64px)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* DESIGN TOKENS */
+  /* ── Palette ── */
   --ar-theme-hue: 200;
   --ar-color-primary: hsl(var(--ar-theme-hue) 20% 8%);
   --ar-color-primary-foreground: hsl(var(--ar-theme-hue) 100% 92%);
   --ar-color-secondary: hsl(var(--ar-theme-hue) 40% 12%);
   --ar-color-accent: hsl(var(--ar-theme-hue) 100% 50%);
   --ar-color-edge: hsl(var(--ar-theme-hue) 30% 18%);
+
+  /* ── Typography ── */
   --ar-font-family: "Rajdhani", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
+  --ar-font-size-xs: 0.75rem;
+  --ar-font-size-sm: 0.875rem;
+  --ar-font-size-base: 1rem;
+  --ar-font-size-lg: 1.125rem;
+  --ar-font-size-xl: 1.25rem;
+  --ar-font-size-2xl: 1.5rem;
+  --ar-font-size-3xl: 1.875rem;
+  --ar-font-size-4xl: 2.25rem;
+  --ar-font-size-5xl: 3rem;
+
+  /* ── Spacing ── */
+  --ar-space-1: 0.25rem;
+  --ar-space-2: 0.5rem;
+  --ar-space-3: 0.75rem;
+  --ar-space-4: 1rem;
+  --ar-space-6: 1.5rem;
+  --ar-space-8: 2rem;
+  --ar-space-12: 3rem;
+  --ar-space-16: 4rem;
+
+  /* ── Shape & motion ── */
   --ar-radius-surface: 0.4rem;
   --ar-duration-normal: 200ms;
   --ar-border: 1px solid var(--ar-color-edge);
+
+  /* ── Z-index scale ── */
+  --ar-z-base: 0;
+  --ar-z-dropdown: 10;
+  --ar-z-sticky: 20;
+  --ar-z-overlay: 40;
+  --ar-z-modal: 50;
+
+  /* ── Computed tokens ── */
   --ar-card-gradient: linear-gradient(
     180deg,
     var(--ar-color-secondary),
@@ -39,7 +162,10 @@
     color-mix(in srgb, var(--ar-color-primary) 70%, transparent);
 }
 
-/* Provide aliases so existing Tailwind token names keep working */
+/* ── Tailwind compatibility aliases ──
+ * Keep existing Tailwind token names working so the Astro site renders
+ * identically with or without this standalone file.
+ */
 :root {
   --color-primary: var(--ar-color-primary);
   --color-primary-foreground: var(--ar-color-primary-foreground);
@@ -59,6 +185,15 @@
   --ar-hsl-accent: var(--ar-theme-hue) 100% 50%;
   --ar-hsl-edge: var(--ar-theme-hue) 30% 18%;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  3. BASE RESETS & TYPOGRAPHY
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Minimal reset — border-box everywhere, no default margin on body, and
+ *  fluid root font-size that scales between 15px and 18px.
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
 *,
 *::before,
@@ -101,6 +236,11 @@ button:hover {
   filter: brightness(1.12);
 }
 
+/*
+ * Accent link — use on inline text links that should stand out.
+ *
+ *   <a class="ar-link--accent" href="/about">Learn more</a>
+ */
 .text-link,
 .ar-link--accent {
   color: var(--ar-color-accent);
@@ -109,7 +249,29 @@ button:hover {
   text-underline-offset: 0.15em;
 }
 
-/* Section shell used throughout the site */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  4. SECTION & SURFACE COMPONENTS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  .ar-section
+ *    Full-width band with edge borders and centered inner container.
+ *    The inner container is capped at 72rem (max-w-6xl).
+ *
+ *    <section class="ar-section">
+ *      <div class="ar-section__inner">
+ *        <!-- content -->
+ *      </div>
+ *    </section>
+ *
+ *  .ar-surface
+ *    General-purpose bordered, rounded container.
+ *
+ *    <div class="ar-surface" style="padding: 1rem">
+ *      Card-like content without the card hover effects.
+ *    </div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 .ar-section {
   border: 1px solid var(--ar-color-edge);
   background-color: color-mix(in srgb, var(--ar-color-primary) 92%, black 8%);
@@ -123,7 +285,6 @@ button:hover {
   padding: clamp(1.25rem, 4vw, 3rem);
 }
 
-/* Base surface */
 .ar-surface {
   border: 1px solid var(--ar-color-edge);
   border-radius: var(--ar-radius-surface);
@@ -131,7 +292,39 @@ button:hover {
   color: var(--ar-color-primary-foreground);
 }
 
-/* Card layout used for post previews */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  5. INTERACTIVE COMPONENTS — Card, Tag, Filter Pill
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  .ar-card
+ *    Post-preview card with gradient background, hover lift, and accent
+ *    border on hover.
+ *
+ *    <a href="/post" class="ar-card">
+ *      <div>
+ *        <span class="ar-card__meta">Jan 2025</span>
+ *        <h2>Project Title</h2>
+ *        <p>Short description.</p>
+ *      </div>
+ *      <div class="ar-card__tags">
+ *        <span>React</span><span>TS</span>
+ *      </div>
+ *    </a>
+ *
+ *  .ar-tag
+ *    Pill-shaped toggle button used in the hero tag cloud.
+ *    Set aria-pressed="true" for the active state.
+ *
+ *    <button class="ar-tag">Svelte</button>
+ *    <button class="ar-tag" aria-pressed="true">React</button>
+ *
+ *  .ar-filter-pill
+ *    Active-filter indicator beneath the hero, with a playful hover tilt.
+ *
+ *    <button class="ar-filter-pill">React ×</button>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 .ar-card {
   display: flex;
   flex-direction: column;
@@ -152,7 +345,7 @@ button:hover {
 }
 
 .ar-card__meta {
-  font-size: 0.85rem;
+  font-size: var(--ar-font-size-sm);
   color: color-mix(
     in srgb,
     var(--ar-color-primary-foreground) 75%,
@@ -168,7 +361,8 @@ button:hover {
   font-weight: 700;
 }
 
-/* Tag buttons from the hero */
+/* ── Tag ── */
+
 .ar-tag {
   display: inline-flex;
   align-items: center;
@@ -178,7 +372,9 @@ button:hover {
   border: 1px solid var(--ar-color-accent);
   color: var(--ar-color-accent);
   background: transparent;
+  font-family: var(--ar-font-family);
   font-weight: 600;
+  cursor: pointer;
   transition: background-color var(--ar-duration-normal) ease,
     color var(--ar-duration-normal) ease, opacity var(--ar-duration-normal) ease;
 }
@@ -189,7 +385,8 @@ button:hover {
   color: var(--ar-color-primary);
 }
 
-/* Filter pills (active filters beneath the hero) */
+/* ── Filter Pill ── */
+
 .ar-filter-pill {
   display: inline-flex;
   align-items: center;
@@ -198,7 +395,9 @@ button:hover {
   border: 1px solid var(--ar-color-primary-foreground);
   background-color: var(--ar-color-primary);
   color: var(--ar-color-primary-foreground);
+  font-family: var(--ar-font-family);
   font-weight: 600;
+  cursor: pointer;
   transition: transform var(--ar-duration-normal) ease,
     opacity var(--ar-duration-normal) ease;
 }
@@ -208,31 +407,24 @@ button:hover {
   opacity: 0.8;
 }
 
-/* Cosmetic label text */
-.ar-cosmetic-text {
-  display: inline-block;
-  padding-inline: 0.35rem;
-  color: var(--ar-color-edge);
-  font-size: 1rem;
-  letter-spacing: 0.3em;
-  font-weight: 600;
-}
 
-.ar-cosmetic-text--vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  6. NAVIGATION DRAWER (mobile menu)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Full-screen overlay + slide-in panel from the left.
+ *  Toggle visibility with JS (add/remove the elements or toggle `hidden`).
+ *
+ *    <div class="ar-menu-backdrop">
+ *      <div class="ar-menu-panel">
+ *        <a href="/">Home</a>
+ *        <a href="mailto:hi@example.com">Email</a>
+ *        <a href="https://github.com">GitHub</a>
+ *      </div>
+ *      <button class="ar-menu-backdrop__close" aria-label="Close menu"></button>
+ *    </div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Gradient backgrounds from hero/about sections */
-.ar-bg-hero {
-  background-image: var(--ar-hero-gradient);
-}
-
-.ar-bg-about {
-  background-image: var(--ar-about-gradient);
-}
-
-/* Navigation drawer */
 .ar-menu-backdrop {
   position: fixed;
   inset: 0;
@@ -243,7 +435,7 @@ button:hover {
     transparent
   );
   backdrop-filter: blur(8px);
-  z-index: 40;
+  z-index: var(--ar-z-overlay);
 }
 
 .ar-menu-panel {
@@ -256,10 +448,10 @@ button:hover {
     var(--ar-color-primary) 95%,
     transparent
   );
-  padding: 2rem;
+  padding: var(--ar-space-8);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--ar-space-4);
   text-align: right;
   font-size: 1.4rem;
 }
@@ -268,7 +460,25 @@ button:hover {
   color: var(--ar-color-primary-foreground);
 }
 
-/* Accent photo frame */
+.ar-menu-backdrop__close {
+  flex: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  7. PHOTO FRAME
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Accent-coloured frame with a rotated image that straightens on hover.
+ *
+ *    <div class="ar-photo-frame">
+ *      <img src="portrait.jpg" alt="Profile" />
+ *    </div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 .ar-photo-frame {
   display: inline-flex;
   padding: 0.35rem;
@@ -287,7 +497,657 @@ button:hover {
   transform: rotate(0deg) scale(1.02);
 }
 
-/* Utility helpers that mirror the class names used in the Astro project */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  8. COSMETIC TEXT
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Decorative label text — uppercase, wide letter-spacing, muted colour.
+ *  Use the `--vertical` modifier for vertical writing mode.
+ *
+ *    <span class="ar-cosmetic-text">PORTFOLIO</span>
+ *    <span class="ar-cosmetic-text ar-cosmetic-text--vertical">ABOUT</span>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-cosmetic-text {
+  display: inline-block;
+  padding-inline: 0.35rem;
+  color: var(--ar-color-edge);
+  font-size: var(--ar-font-size-base);
+  letter-spacing: 0.3em;
+  font-weight: 600;
+}
+
+.ar-cosmetic-text--vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  9. LAYOUT PRIMITIVES
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Lightweight flex and container helpers so you don't need a utility
+ *  framework for basic layouts.
+ *
+ *    <div class="ar-container">Centred max-width content</div>
+ *    <div class="ar-flex-row" style="gap: 1rem">…</div>
+ *    <div class="ar-flex-col" style="gap: 1rem">…</div>
+ *    <div class="ar-flex-center">Centred in both axes</div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-container {
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+
+.ar-flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.ar-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.ar-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ar-flex-wrap {
+  flex-wrap: wrap;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  10. RESPONSIVE POST GRID
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Auto-responsive grid: 1 column → 2 at 640px → 3 at 768px.
+ *
+ *    <div class="ar-post-grid">
+ *      <a class="ar-card" href="#">…</a>
+ *      <a class="ar-card" href="#">…</a>
+ *      <a class="ar-card" href="#">…</a>
+ *    </div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-post-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ar-space-4);
+  padding: var(--ar-space-4);
+  border-radius: var(--ar-radius-surface);
+}
+
+@media (min-width: 640px) {
+  .ar-post-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .ar-post-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  11. HEADER & FOOTER PATTERNS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  .ar-header
+ *    Top navigation bar. Name/logo on the left, contact links on the right.
+ *    Contact links are hidden on mobile (< 768px) where the menu drawer
+ *    takes over. A menu toggle slot is provided for mobile.
+ *
+ *    <header class="ar-header">
+ *      <a href="/" class="ar-header__name">Aaron Richter</a>
+ *      <button class="ar-header__menu-toggle" aria-label="Menu">☰</button>
+ *      <nav class="ar-header__contact">
+ *        <a href="mailto:hi@example.com">Email</a>
+ *        <a href="https://github.com">GitHub</a>
+ *      </nav>
+ *    </header>
+ *
+ *  .ar-footer
+ *    Centered footer with links and an optional badge.
+ *
+ *    <footer class="ar-footer">
+ *      <a href="/impressum">Impressum</a>
+ *      <a href="/datenschutz">Datenschutz</a>
+ *      <span class="ar-footer__badge">100% HANDMADE</span>
+ *    </footer>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: var(--ar-space-2);
+  border: 1px solid var(--ar-color-edge);
+}
+
+.ar-header__name {
+  font-size: var(--ar-font-size-4xl);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+@media (min-width: 640px) {
+  .ar-header__name {
+    font-size: var(--ar-font-size-5xl);
+  }
+}
+
+/* Mobile menu toggle — visible below 768px, hidden above */
+.ar-header__menu-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--ar-color-accent);
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .ar-header__menu-toggle {
+    display: none;
+  }
+}
+
+/* Desktop contact links — hidden below 768px */
+.ar-header__contact {
+  display: none;
+  margin-left: auto;
+  flex-direction: column;
+  gap: var(--ar-space-2);
+}
+
+.ar-header__contact a {
+  transition: filter var(--ar-duration-normal) ease;
+}
+
+.ar-header__contact a:hover {
+  filter: brightness(1.25);
+}
+
+@media (min-width: 768px) {
+  .ar-header__contact {
+    display: flex;
+  }
+}
+
+/* ── Footer ── */
+
+.ar-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--ar-space-8);
+  padding: var(--ar-space-16) var(--ar-space-4);
+  border: 1px solid var(--ar-color-edge);
+  text-align: center;
+}
+
+.ar-footer a {
+  transition: filter var(--ar-duration-normal) ease;
+}
+
+.ar-footer a:hover {
+  filter: brightness(1.25);
+}
+
+/*
+ * .ar-footer__badge
+ *   Small bordered label, e.g. "100% HANDMADE".
+ *
+ *   <span class="ar-footer__badge">100% HANDMADE</span>
+ */
+.ar-footer__badge {
+  display: inline-block;
+  padding: var(--ar-space-1) var(--ar-space-2);
+  border: 1px solid var(--ar-color-primary-foreground);
+  border-radius: var(--ar-radius-surface);
+  font-size: var(--ar-font-size-xs);
+  font-weight: 900;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  12. PROSE / CONTENT TYPOGRAPHY
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Standalone replacement for @tailwindcss/typography's `.prose` class.
+ *  Wrap any long-form HTML content in `.ar-prose` to get properly spaced
+ *  headings, paragraphs, lists, code blocks, blockquotes, images, and links.
+ *
+ *    <article class="ar-prose">
+ *      <h1>Title</h1>
+ *      <p>Paragraph text …</p>
+ *      <pre><code>const x = 1;</code></pre>
+ *      <blockquote><p>A quote.</p></blockquote>
+ *    </article>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-prose {
+  max-width: 65ch;
+  font-size: var(--ar-font-size-lg);
+  line-height: 1.75;
+  color: var(--ar-color-primary-foreground);
+}
+
+/* ── Headings ── */
+
+.ar-prose h1 {
+  font-size: var(--ar-font-size-4xl);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 0;
+  margin-bottom: var(--ar-space-4);
+}
+
+.ar-prose h2 {
+  font-size: var(--ar-font-size-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: var(--ar-space-8);
+  margin-bottom: var(--ar-space-3);
+}
+
+.ar-prose h3 {
+  font-size: var(--ar-font-size-2xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: var(--ar-space-6);
+  margin-bottom: var(--ar-space-2);
+}
+
+.ar-prose h4 {
+  font-size: var(--ar-font-size-xl);
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: var(--ar-space-6);
+  margin-bottom: var(--ar-space-2);
+}
+
+/* ── Paragraphs & spacing ── */
+
+.ar-prose p {
+  margin-top: 0;
+  margin-bottom: var(--ar-space-4);
+}
+
+/* ── Links ── */
+
+.ar-prose a {
+  color: var(--ar-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.15em;
+}
+
+/* ── Lists ── */
+
+.ar-prose ul,
+.ar-prose ol {
+  padding-left: 1.5em;
+  margin-top: 0;
+  margin-bottom: var(--ar-space-4);
+}
+
+.ar-prose li {
+  margin-bottom: var(--ar-space-2);
+}
+
+.ar-prose li > ul,
+.ar-prose li > ol {
+  margin-top: var(--ar-space-2);
+  margin-bottom: 0;
+}
+
+/* ── Inline code ── */
+
+.ar-prose code {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  font-size: 0.875em;
+  background-color: var(--ar-color-secondary);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+}
+
+/* ── Code blocks ── */
+
+.ar-prose pre {
+  background-color: var(--ar-color-secondary);
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  padding: var(--ar-space-4);
+  overflow-x: auto;
+  margin-top: 0;
+  margin-bottom: var(--ar-space-4);
+}
+
+.ar-prose pre code {
+  background: none;
+  padding: 0;
+  font-size: var(--ar-font-size-sm);
+}
+
+/* ── Blockquote ── */
+
+.ar-prose blockquote {
+  border-left: 4px solid var(--ar-color-accent);
+  padding-left: var(--ar-space-4);
+  margin-inline: 0;
+  margin-bottom: var(--ar-space-4);
+  font-style: italic;
+  color: color-mix(
+    in srgb,
+    var(--ar-color-primary-foreground) 85%,
+    transparent
+  );
+}
+
+.ar-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Images ── */
+
+.ar-prose img {
+  border-radius: var(--ar-radius-surface);
+  border: 1px solid var(--ar-color-edge);
+  margin-bottom: var(--ar-space-4);
+}
+
+/* ── Horizontal rules ── */
+
+.ar-prose hr {
+  border: none;
+  border-top: 1px solid var(--ar-color-edge);
+  margin: var(--ar-space-8) 0;
+}
+
+/* ── Tables ── */
+
+.ar-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--ar-space-4);
+  font-size: var(--ar-font-size-base);
+}
+
+.ar-prose th,
+.ar-prose td {
+  border: 1px solid var(--ar-color-edge);
+  padding: var(--ar-space-2) var(--ar-space-3);
+  text-align: left;
+}
+
+.ar-prose th {
+  background-color: var(--ar-color-secondary);
+  font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  13. CRAFT CONTENT BLOCKS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Styles for each Craft CMS block type rendered by <CraftBlock>.
+ *  These mirror the Tailwind utility classes used in CraftBlock.svelte.
+ *
+ *    .craft-media      — image figures (rounded, edge border)
+ *    .craft-video      — video containers
+ *    .craft-code       — code blocks with secondary bg
+ *    .craft-file       — downloadable file link
+ *    .craft-rich-url   — rich URL preview card
+ *    .craft-page       — nested page block
+ *    .craft-children   — indented child blocks
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Shared paragraph spacing inside all craft blocks ── */
+
+.craft-text p,
+.craft-generic p,
+.craft-page p,
+.craft-block p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.craft-text p:first-child,
+.craft-generic p:first-child,
+.craft-page p:first-child,
+.craft-block p:first-child {
+  margin-top: 0.25rem;
+}
+
+.craft-text p:last-child,
+.craft-generic p:last-child,
+.craft-page p:last-child,
+.craft-block p:last-child {
+  margin-bottom: 0.25rem;
+}
+
+/* ── Media (images) ── */
+
+.craft-media {
+  width: 100%;
+}
+
+.craft-media img {
+  border-radius: var(--ar-radius-surface);
+  border: 1px solid var(--ar-color-edge);
+  width: 100%;
+}
+
+.craft-media figcaption,
+.craft-media .text-sm {
+  font-size: var(--ar-font-size-sm);
+  color: color-mix(
+    in srgb,
+    var(--ar-color-primary-foreground) 70%,
+    transparent
+  );
+  margin-top: var(--ar-space-2);
+}
+
+/* ── Video ── */
+
+.craft-video {
+  border-radius: var(--ar-radius-surface);
+  overflow: hidden;
+  border: 1px solid var(--ar-color-edge);
+}
+
+.craft-video video {
+  width: 100%;
+  display: block;
+}
+
+/* ── Code ── */
+
+.craft-code {
+  overflow: auto;
+  border-radius: var(--ar-radius-surface);
+  border: 1px solid var(--ar-color-edge);
+  background-color: color-mix(in srgb, var(--ar-color-secondary) 50%, transparent);
+  padding: var(--ar-space-4);
+}
+
+.craft-code code {
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  font-size: var(--ar-font-size-sm);
+}
+
+/* ── File download ── */
+
+.craft-file {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ar-space-2);
+  padding: var(--ar-space-2) var(--ar-space-4);
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  transition: border-color var(--ar-duration-normal) ease;
+}
+
+.craft-file:hover {
+  border-color: var(--ar-color-accent);
+}
+
+/* ── Rich URL preview ── */
+
+.craft-rich-url {
+  display: block;
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  padding: var(--ar-space-4);
+  transition: border-color var(--ar-duration-normal) ease;
+}
+
+.craft-rich-url:hover {
+  border-color: var(--ar-color-accent);
+}
+
+/* ── Nested page block ── */
+
+.craft-page {
+  border: 1px solid var(--ar-color-edge);
+  border-radius: var(--ar-radius-surface);
+  padding: var(--ar-space-4);
+}
+
+/* ── Child blocks (indented tree) ── */
+
+.craft-children {
+  margin-left: var(--ar-space-4);
+  border-left: 1px solid color-mix(
+    in srgb,
+    var(--ar-color-edge) 50%,
+    transparent
+  );
+  padding-left: var(--ar-space-4);
+}
+
+/* ── Horizontal rule ── */
+
+.craft-line {
+  border-color: var(--ar-color-edge);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  14. ANIMATIONS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  .ar-fade-in
+ *    Fade + slide up entrance. Apply to any element for a subtle intro.
+ *    Use `--delay-N` modifiers for staggered lists.
+ *
+ *    <div class="ar-fade-in">I fade in</div>
+ *    <div class="ar-fade-in ar-delay-2">I fade in slightly later</div>
+ *
+ *  .ar-slide-in-right
+ *    Horizontal slide from right — used by the menu drawer panel.
+ *
+ *    <div class="ar-slide-in-right">Slides from right edge</div>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes ar-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ar-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ar-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.ar-fade-in {
+  animation: ar-fade-in 0.4s ease both;
+}
+
+.ar-slide-in-right {
+  animation: ar-slide-in-right 0.3s ease both;
+}
+
+.ar-slide-in-left {
+  animation: ar-slide-in-left 0.3s ease both;
+}
+
+/* ── Staggered delay modifiers ──
+ *
+ *  Use on siblings for a cascading reveal effect:
+ *    <div class="ar-fade-in ar-delay-1">First</div>
+ *    <div class="ar-fade-in ar-delay-2">Second</div>
+ *    <div class="ar-fade-in ar-delay-3">Third</div>
+ */
+
+.ar-delay-1 { animation-delay: 0.1s; }
+.ar-delay-2 { animation-delay: 0.2s; }
+.ar-delay-3 { animation-delay: 0.3s; }
+.ar-delay-4 { animation-delay: 0.4s; }
+.ar-delay-5 { animation-delay: 0.5s; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  15. GRADIENT BACKGROUNDS
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Decorative radial gradients used on the hero and about sections.
+ *
+ *    <section class="ar-section ar-bg-hero">…</section>
+ *    <section class="ar-section ar-bg-about">…</section>
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ar-bg-hero {
+  background-image: var(--ar-hero-gradient);
+}
+
+.ar-bg-about {
+  background-image: var(--ar-about-gradient);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  16. UTILITY HELPERS & TAILWIND COMPATIBILITY ALIASES
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  These mirror the class names used throughout the Astro/Svelte project
+ *  so the site renders identically whether Tailwind is present or not.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 .rounded-interactive {
   border-radius: var(--ar-radius-surface);
 }
@@ -319,4 +1179,22 @@ button:hover {
 
 .border-accent {
   border-color: var(--ar-color-accent);
+}
+
+/* ── Visibility helpers ── */
+
+.ar-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.ar-hidden {
+  display: none;
 }

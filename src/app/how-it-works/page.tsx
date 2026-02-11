@@ -58,11 +58,11 @@ export default function HowItWorksPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="overflow-hidden relative bg-gradient-to-b border-b border-border from-background to-muted/20">
-          <div className="px-6 py-24 mx-auto max-w-7xl lg:px-8 sm:py-32">
-            <div className="mx-auto max-w-3xl text-center">
+        <section className="ar-section ar-bg-hero">
+          <div className="ar-section__inner">
+            <div className="mx-auto max-w-3xl text-center ar-fade-in">
               <Link href="/">
                 <Button variant="ghost" size="sm" className="mb-10 -ml-2">
                   ← Back to home
@@ -95,9 +95,9 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Quick Overview Cards */}
-        <section className="py-20 bg-muted/30 sm:py-24">
-          <div className="px-6 mx-auto max-w-7xl lg:px-8">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
+        <section className="ar-section">
+          <div className="ar-section__inner">
+            <div className="mx-auto mb-16 max-w-2xl text-center ar-fade-in">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 Why Craft Events?
               </h2>
@@ -107,80 +107,88 @@ export default function HowItWorksPage() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
-              <Card className="h-full transition-all hover:shadow-md">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
-                    <Calendar className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">
-                    Easy Scheduling
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Create event pages with time slots in seconds. No complex
-                    setup required.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-1">
+                <Card className="h-full transition-all hover:shadow-md">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
+                      <Calendar className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold">
+                      Easy Scheduling
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Create event pages with time slots in seconds. No complex
+                      setup required.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="h-full transition-all hover:shadow-md">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
-                    <Lock className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">
-                    Secure by Design
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Your API credentials are encrypted server-side. Never
-                    exposed to browsers or stored in databases.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-2">
+                <Card className="h-full transition-all hover:shadow-md">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold">
+                      Secure by Design
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Your API credentials are encrypted server-side. Never
+                      exposed to browsers or stored in databases.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="h-full transition-all hover:shadow-md">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
-                    <Share2 className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">
-                    Share Instantly
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Share voting links with anyone. No Craft accounts needed for
-                    participants.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-3">
+                <Card className="h-full transition-all hover:shadow-md">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
+                      <Share2 className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold">
+                      Share Instantly
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Share voting links with anyone. No Craft accounts needed for
+                      participants.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="h-full transition-all hover:shadow-md">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
-                    <Zap className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold">
-                    Live Results
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    View current availability anytime. Refresh the results page
-                    to see the latest votes synced from your Craft document.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-4">
+                <Card className="h-full transition-all hover:shadow-md">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-center items-center mb-4 w-12 h-12 rounded-lg bg-primary/10">
+                      <Zap className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold">
+                      Live Results
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      View current availability anytime. Refresh the results page
+                      to see the latest votes synced from your Craft document.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </section>
 
         {/* How to Create a Connection Section */}
-        <section id="connection" className="py-20 bg-background sm:py-24">
-          <div className="px-6 mx-auto max-w-7xl lg:px-8">
+        <section id="connection" className="ar-section">
+          <div className="ar-section__inner">
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 How to Create a Connection
@@ -192,7 +200,7 @@ export default function HowItWorksPage() {
 
             <div className="space-y-20 sm:space-y-24">
               {/* Step 1: Create API Connection */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="mb-10">
                   <div className="flex gap-4 items-center mb-6">
                     <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
@@ -277,8 +285,8 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Visual Workflow Section */}
-        <section id="workflow" className="py-20 bg-background sm:py-24">
-          <div className="px-6 mx-auto max-w-7xl lg:px-8">
+        <section id="workflow" className="ar-section">
+          <div className="ar-section__inner">
             <div className="mx-auto mb-16 max-w-2xl text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 The Complete Workflow
@@ -290,7 +298,7 @@ export default function HowItWorksPage() {
 
             <div className="space-y-20 sm:space-y-24">
               {/* Step 1 */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="flex flex-col gap-10 items-center lg:flex-row lg:gap-16">
                   <div className="flex-1 w-full">
                     <div className="flex gap-4 items-center mb-6">
@@ -352,7 +360,7 @@ export default function HowItWorksPage() {
               <Separator className="my-16" />
 
               {/* Step 2 */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="flex flex-col gap-10 items-center lg:flex-row-reverse lg:gap-16">
                   <div className="flex-1 w-full">
                     <div className="flex gap-4 items-center mb-6">
@@ -414,7 +422,7 @@ export default function HowItWorksPage() {
               <Separator className="my-16" />
 
               {/* Step 3 */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="flex flex-col gap-10 items-center lg:flex-row lg:gap-16">
                   <div className="flex-1 w-full">
                     <div className="flex gap-4 items-center mb-6">
@@ -475,7 +483,7 @@ export default function HowItWorksPage() {
               <Separator className="my-16" />
 
               {/* Step 4 */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="flex flex-col gap-10 items-center lg:flex-row-reverse lg:gap-16">
                   <div className="flex-1 w-full">
                     <div className="flex gap-4 items-center mb-6">
@@ -535,7 +543,7 @@ export default function HowItWorksPage() {
               <Separator className="my-16" />
 
               {/* Step 5 */}
-              <div className="relative">
+              <div className="relative ar-fade-in">
                 <div className="flex flex-col gap-10 items-center lg:flex-row lg:gap-16">
                   <div className="flex-1 w-full">
                     <div className="flex gap-4 items-center mb-6">
@@ -580,9 +588,9 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Security Deep Dive */}
-        <section className="py-20 bg-muted/30 sm:py-24">
-          <div className="px-6 mx-auto max-w-7xl lg:px-8">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
+        <section className="ar-section ar-bg-about">
+          <div className="ar-section__inner">
+            <div className="mx-auto mb-16 max-w-2xl text-center ar-fade-in">
               <div className="flex justify-center mb-6">
                 <div className="flex justify-center items-center w-16 h-16 rounded-full bg-primary/10">
                   <Shield className="w-8 h-8 text-primary" />
@@ -597,86 +605,90 @@ export default function HowItWorksPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 sm:gap-8">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="flex gap-2 items-center text-lg">
-                    <Lock className="w-5 h-5 text-primary shrink-0" />
-                    AES-GCM Encryption
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    Your API credentials are encrypted using AES-GCM (Advanced
-                    Encryption Standard - Galois/Counter Mode), the same
-                    encryption used by major tech companies and governments.
-                  </p>
-                  <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>
-                        PBKDF2 key derivation with server-side master key
-                      </span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>
-                        Unique 12-byte initialization vector per encryption
-                      </span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>16-byte authentication tag prevents tampering</span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>URL-safe Base64URL encoding for sharing</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-1">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle className="flex gap-2 items-center text-lg">
+                      <Lock className="w-5 h-5 text-primary shrink-0" />
+                      AES-GCM Encryption
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Your API credentials are encrypted using AES-GCM (Advanced
+                      Encryption Standard - Galois/Counter Mode), the same
+                      encryption used by major tech companies and governments.
+                    </p>
+                    <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          PBKDF2 key derivation with server-side master key
+                        </span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Unique 12-byte initialization vector per encryption
+                        </span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>16-byte authentication tag prevents tampering</span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>URL-safe Base64URL encoding for sharing</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="flex gap-2 items-center text-lg">
-                    <Shield className="w-5 h-5 text-primary shrink-0" />
-                    Server-Side Processing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    All API calls to Craft are made server-side using Next.js
-                    Server Actions. Your credentials are decrypted only on the
-                    server, used for the API call, and immediately discarded.
-                  </p>
-                  <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>No database storage of credentials</span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>
-                        Credentials never appear in browser network logs
-                      </span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>
-                        Decrypted values discarded immediately after use
-                      </span>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>
-                        Master key stored as environment variable only
-                      </span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+              <div className="ar-fade-in ar-delay-2">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle className="flex gap-2 items-center text-lg">
+                      <Shield className="w-5 h-5 text-primary shrink-0" />
+                      Server-Side Processing
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      All API calls to Craft are made server-side using Next.js
+                      Server Actions. Your credentials are decrypted only on the
+                      server, used for the API call, and immediately discarded.
+                    </p>
+                    <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>No database storage of credentials</span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Credentials never appear in browser network logs
+                        </span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Decrypted values discarded immediately after use
+                        </span>
+                      </li>
+                      <li className="flex gap-3 items-start">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Master key stored as environment variable only
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
-            <div className="mt-12">
+            <div className="mt-12 ar-fade-in ar-delay-3">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-xl">What You Control</CardTitle>
@@ -742,37 +754,39 @@ export default function HowItWorksPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-background sm:py-24">
-          <div className="px-6 mx-auto max-w-7xl lg:px-8">
-            <Card className="bg-gradient-to-br border-2 border-primary/20 from-primary/5 to-primary/10">
-              <CardContent className="px-6 py-16 text-center sm:px-8 sm:py-20">
-                <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Ready to Get Started?
-                </h2>
-                <p className="mx-auto mb-10 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-                  Create your first event scheduling page in minutes. No complex
-                  setup, no database required—just connect to Craft and start
-                  scheduling.
-                </p>
-                <div className="flex flex-col gap-4 justify-center items-center sm:flex-row sm:gap-6">
-                  <Link href="/">
-                    <Button size="lg" className="gap-2 min-w-[180px]">
-                      Create Your First Event
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <Link href="/privacy">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="min-w-[180px]"
-                    >
-                      Read Privacy Policy
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+        <section className="ar-section">
+          <div className="ar-section__inner">
+            <div className="ar-fade-in">
+              <Card className="bg-gradient-to-br border-2 border-primary/20 from-primary/5 to-primary/10">
+                <CardContent className="px-6 py-16 text-center sm:px-8 sm:py-20">
+                  <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    Ready to Get Started?
+                  </h2>
+                  <p className="mx-auto mb-10 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+                    Create your first event scheduling page in minutes. No complex
+                    setup, no database required—just connect to Craft and start
+                    scheduling.
+                  </p>
+                  <div className="flex flex-col gap-4 justify-center items-center sm:flex-row sm:gap-6">
+                    <Link href="/">
+                      <Button size="lg" className="gap-2 min-w-[180px]">
+                        Create Your First Event
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                    <Link href="/privacy">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="min-w-[180px]"
+                      >
+                        Read Privacy Policy
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
       </div>

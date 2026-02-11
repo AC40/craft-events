@@ -71,7 +71,7 @@ export default function EventResultsPage() {
 
     // Only copy on initial visit after creation (when justCreated query param is present)
     const justCreated = searchParams?.get("justCreated") === "true";
-    
+
     if (justCreated) {
       navigator.clipboard.writeText(voteUrl).then(() => {
         toast.success("Voting link copied to clipboard!", {
@@ -98,47 +98,49 @@ export default function EventResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 min-h-screen bg-background">
-        <div className="mx-auto space-y-6 max-w-6xl">
-          <div className="space-y-1">
-            <Skeleton className="h-9 w-32 mb-2" />
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-9 w-64" />
-          </div>
-          <Card>
-            <CardContent className="p-6 space-y-6">
-              {/* Column headers */}
-              <div className="flex gap-4">
-                <Skeleton className="h-6 w-[200px]" />
-                <Skeleton className="h-6 flex-1" />
-                <Skeleton className="h-6 flex-1" />
-                <Skeleton className="h-6 flex-1" />
-                <Skeleton className="h-6 flex-1" />
-              </div>
-              {/* Participant rows */}
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-4 items-center">
-                  <div className="flex gap-2 items-center w-[200px]">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner">
+          <div className="mx-auto space-y-6 max-w-6xl">
+            <div className="space-y-1">
+              <Skeleton className="h-9 w-32 mb-2" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-9 w-64" />
+            </div>
+            <Card>
+              <CardContent className="p-6 space-y-6">
+                {/* Column headers */}
+                <div className="flex gap-4">
+                  <Skeleton className="h-6 w-[200px]" />
                   <Skeleton className="h-6 flex-1" />
                   <Skeleton className="h-6 flex-1" />
                   <Skeleton className="h-6 flex-1" />
                   <Skeleton className="h-6 flex-1" />
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+                {/* Participant rows */}
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex gap-4 items-center">
+                    <div className="flex gap-2 items-center w-[200px]">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-6 flex-1" />
+                    <Skeleton className="h-6 flex-1" />
+                    <Skeleton className="h-6 flex-1" />
+                    <Skeleton className="h-6 flex-1" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (error || !block) {
     return (
-      <div className="p-8 min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <div className="p-3 text-sm rounded border text-destructive-foreground bg-destructive/90 border-destructive/50">
@@ -154,14 +156,14 @@ export default function EventResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (!table) {
     return (
-      <div className="p-8 min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <p className="mb-4 text-center text-muted-foreground">
@@ -186,14 +188,14 @@ export default function EventResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (timeSlots.length === 0) {
     return (
-      <div className="p-8 min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <p className="mb-4 text-center text-muted-foreground">
@@ -220,73 +222,75 @@ export default function EventResultsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="p-8 min-h-screen bg-background">
-      <div className="mx-auto space-y-6 max-w-6xl">
-        <div className="space-y-1">
-          <div className="mb-2">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                ← Back to home
-              </Button>
-            </Link>
-          </div>
-          <p className="text-sm text-muted-foreground">Event results</p>
-          <h1 className="text-3xl font-semibold text-foreground">
-            {eventTitle}
-          </h1>
-        </div>
-
-        <ResultsView table={table} timeSlots={timeSlots} timezone={timezone} />
-
-        {isOrganiser && (
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Share with participants
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  This event was created in Craft. Share the voting link below
-                  so participants can mark their availability.
-                </p>
-              </div>
-              <div className="flex gap-2 items-center">
-                <div className="flex-1 p-3 font-mono text-sm break-all rounded border bg-secondary border-border">
-                  {voteUrl}
-                </div>
-                <Button onClick={handleCopyLink} variant="outline">
-                  Copy
+    <section className="ar-section min-h-screen">
+      <div className="ar-section__inner">
+        <div className="mx-auto space-y-6 max-w-6xl ar-fade-in">
+          <div className="space-y-1">
+            <div className="mb-2">
+              <Link href="/">
+                <Button variant="ghost" size="sm">
+                  ← Back to home
                 </Button>
-              </div>
+              </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">Event results</p>
+            <h1 className="text-3xl font-semibold text-foreground">
+              {eventTitle}
+            </h1>
+          </div>
+
+          <ResultsView table={table} timeSlots={timeSlots} timezone={timezone} />
+
+          {isOrganiser && (
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Share with participants
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    This event was created in Craft. Share the voting link below
+                    so participants can mark their availability.
+                  </p>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1 p-3 font-mono text-sm break-all rounded border bg-secondary border-border">
+                    {voteUrl}
+                  </div>
+                  <Button onClick={handleCopyLink} variant="outline">
+                    Copy
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardContent className="space-y-3">
+              <p className="mt-4 text-sm text-muted-foreground">
+                Need to update your availability? Head to the voting view.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/event/${blockId}?blob=${encodeURIComponent(
+                      encryptedBlob || ""
+                    )}&title=${encodeURIComponent(eventTitle)}`
+                  )
+                }
+              >
+                Vote again
+              </Button>
             </CardContent>
           </Card>
-        )}
-
-        <Card>
-          <CardContent className="space-y-3">
-            <p className="mt-4 text-sm text-muted-foreground">
-              Need to update your availability? Head to the voting view.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() =>
-                router.push(
-                  `/event/${blockId}?blob=${encodeURIComponent(
-                    encryptedBlob || ""
-                  )}&title=${encodeURIComponent(eventTitle)}`
-                )
-              }
-            >
-              Vote again
-            </Button>
-          </CardContent>
-        </Card>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

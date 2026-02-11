@@ -103,8 +103,9 @@ export default function EventView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="mx-auto max-w-6xl space-y-6">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner">
+          <div className="mx-auto max-w-6xl space-y-6">
           <div className="space-y-1">
             <Skeleton className="h-9 w-32 mb-2" />
             <Skeleton className="h-4 w-24" />
@@ -125,14 +126,15 @@ export default function EventView() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
+      </section>
     );
   }
 
   if (error || !block) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <div className="text-sm text-destructive-foreground bg-destructive/90 p-3 rounded border border-destructive/50">
@@ -148,14 +150,14 @@ export default function EventView() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (!table) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <p className="text-center text-muted-foreground mb-4">
@@ -180,14 +182,14 @@ export default function EventView() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (timeSlots.length === 0) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
+      <section className="ar-section min-h-screen">
+        <div className="ar-section__inner max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6">
               <p className="text-center text-muted-foreground mb-4">
@@ -216,55 +218,57 @@ export default function EventView() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <div className="space-y-1">
-          <div className="mb-2">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                ← Back to home
-              </Button>
-            </Link>
+    <section className="ar-section min-h-screen">
+      <div className="ar-section__inner">
+        <div className="mx-auto max-w-6xl space-y-6 ar-fade-in">
+          <div className="space-y-1">
+            <div className="mb-2">
+              <Link href="/">
+                <Button variant="ghost" size="sm">
+                  ← Back to home
+                </Button>
+              </Link>
+            </div>
+            <p className="text-sm text-muted-foreground">Event polling</p>
+            <h1 className="text-3xl font-semibold text-foreground">
+              {eventTitle}
+            </h1>
           </div>
-          <p className="text-sm text-muted-foreground">Event polling</p>
-          <h1 className="text-3xl font-semibold text-foreground">
-            {eventTitle}
-          </h1>
+
+          <VotingForm
+            table={table}
+            timeSlots={timeSlots}
+            timezone={timezone}
+            onSubmit={handleVoteSubmit}
+            onBack={() => router.push("/")}
+          />
+
+          <Card>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Preview the current availability without submitting another vote.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/event/${blockId}/results?blob=${encodeURIComponent(
+                      encryptedBlob || ""
+                    )}&title=${encodeURIComponent(eventTitle)}`
+                  )
+                }
+              >
+                View live results
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-
-        <VotingForm
-          table={table}
-          timeSlots={timeSlots}
-          timezone={timezone}
-          onSubmit={handleVoteSubmit}
-          onBack={() => router.push("/")}
-        />
-
-        <Card>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Preview the current availability without submitting another vote.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() =>
-                router.push(
-                  `/event/${blockId}/results?blob=${encodeURIComponent(
-                    encryptedBlob || ""
-                  )}&title=${encodeURIComponent(eventTitle)}`
-                )
-              }
-            >
-              View live results
-            </Button>
-          </CardContent>
-        </Card>
       </div>
-    </div>
+    </section>
   );
 }

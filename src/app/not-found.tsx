@@ -16,13 +16,13 @@ export default function NotFound() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-2xl font-bold">Page not found</h1>
-        <p className="text-muted-foreground">Redirecting to home...</p>
+    <section className="ar-section min-h-screen">
+      <div className="ar-section__inner flex items-center justify-center min-h-[60vh]">
+        <div className="text-center ar-fade-in">
+          <h1 className="mb-4 text-2xl font-bold">Page not found</h1>
+          <p className="text-muted-foreground">Redirecting to home...</p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
-
-
