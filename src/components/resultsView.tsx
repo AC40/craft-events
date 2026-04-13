@@ -9,7 +9,6 @@ import type { ParsedTable } from "@/lib/tableParser";
 import {
   formatDateInTimezone,
   formatTimeInTimezone,
-  getLocalTimeString,
 } from "@/lib/tableParser";
 
 interface ResultsViewProps {
@@ -33,12 +32,7 @@ export default function ResultsView({
   };
 
   const formatTime = (date: Date): string => {
-    const timeStr = formatTimeInTimezone(date, timezone);
-    const localTime = getLocalTimeString(date, timezone);
-    if (localTime) {
-      return `${timeStr} (${localTime})`;
-    }
-    return timeStr;
+    return formatTimeInTimezone(date, timezone);
   };
 
   const getParticipantCount = (slotIndex: number): number => {

@@ -16,7 +16,6 @@ import type { ParsedTable } from "@/lib/tableParser";
 import {
   formatDateInTimezone,
   formatTimeInTimezone,
-  getLocalTimeString,
 } from "@/lib/tableParser";
 
 const MotionButton = motion.create(Button);
@@ -84,12 +83,7 @@ export default function VotingForm({
   };
 
   const formatTime = (date: Date): string => {
-    const timeStr = formatTimeInTimezone(date, timezone);
-    const localTime = getLocalTimeString(date, timezone);
-    if (localTime) {
-      return `${timeStr} (${localTime} your time)`;
-    }
-    return timeStr;
+    return formatTimeInTimezone(date, timezone);
   };
 
   return (
