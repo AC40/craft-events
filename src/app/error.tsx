@@ -12,6 +12,21 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    const isChunkLoadError =
+      error.name === "ChunkLoadError" ||
+      /Loading (CSS )?chunk [\d]+ failed/.test(error.message);
+
+    if (isChunkLoadError && typeof window !== "undefined") {
+      // Stale bundle after a deploy — reload once to pick up fresh chunk hashes.
+      // Guard against reload loops if the fresh bundle still errors.
+      const reloadKey = "chunk-reload-attempted";
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, "1");
+        window.location.reload();
+        return;
+      }
+    }
+
     console.error("Unhandled error:", error);
   }, [error]);
 
