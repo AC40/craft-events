@@ -22,7 +22,6 @@ export function parseMarkdownTable(markdown: string): ParsedTable | null {
   }
 
   const headerLine = lines[0];
-  const separatorLine = lines[1];
   // Timezone is now stored in a separate block, not in the table
   // So we start data lines right after the separator
   const dataLines = lines.slice(2);
@@ -66,6 +65,7 @@ export function formatTableHeader(date: Date, timezone: string): string {
 
   const day = parts.find((p) => p.type === "day")?.value || "01";
   const month = parts.find((p) => p.type === "month")?.value || "01";
+  const year = parts.find((p) => p.type === "year")?.value || "1970";
   const hours = parts.find((p) => p.type === "hour")?.value || "00";
   const minutes = parts.find((p) => p.type === "minute")?.value || "00";
 
@@ -74,13 +74,11 @@ export function formatTableHeader(date: Date, timezone: string): string {
     console.log("[formatTableHeader]", {
       dateUTC: date.toISOString(),
       timezone,
-      formatted: `${day}.${month}. ${hours}:${minutes}`,
+      formatted: `${day}.${month}.${year} ${hours}:${minutes}`,
     });
   }
 
-  // Use single-line format without HTML to comply with Craft's markdown parser
-  // which doesn't allow HTML tags in table header cells
-  return `${day}.${month}. ${hours}:${minutes}`;
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 /**
@@ -177,16 +175,49 @@ export function parseTableHeader(
 ): { date: Date; hour: number } | null {
   // Normalize header: handle both old format with <br> tags and new single-line format
   const normalizedHeader = header.replace(/<br\s*\/?>/gi, " ").trim();
-  
-  // Try to parse single-line format: "DD.MM. HH:MM"
-  const singleLineMatch = normalizedHeader.match(/(\d{2})\.(\d{2})\.\s+(\d{2}):(\d{2})/);
-  
+
+  const yearAwareMatch = normalizedHeader.match(
+    /(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})/
+  );
+
+  if (yearAwareMatch) {
+    const day = parseInt(yearAwareMatch[1], 10);
+    const month = parseInt(yearAwareMatch[2], 10) - 1;
+    const year = parseInt(yearAwareMatch[3], 10);
+    const hour = parseInt(yearAwareMatch[4], 10);
+    const minute = parseInt(yearAwareMatch[5], 10);
+
+    const date = createDateInTimezone(year, month, day, hour, minute, timezone);
+
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV === "development"
+    ) {
+      console.log("[parseTableHeader]", {
+        header,
+        parsed: `${day}.${month + 1}.${year} ${hour}:${minute}`,
+        timezone,
+        dateUTC: date.toISOString(),
+      });
+    }
+
+    return { date, hour };
+  }
+
+  const singleLineMatch = normalizedHeader.match(
+    /(\d{2})\.(\d{2})\.\s+(\d{2}):(\d{2})/
+  );
+
   if (singleLineMatch) {
     const day = parseInt(singleLineMatch[1], 10);
     const month = parseInt(singleLineMatch[2], 10) - 1;
     const hour = parseInt(singleLineMatch[3], 10);
     const minute = parseInt(singleLineMatch[4], 10);
-    
+
     const currentYear = new Date().getFullYear();
     const date = createDateInTimezone(
       currentYear,
@@ -196,13 +227,15 @@ export function parseTableHeader(
       minute,
       timezone
     );
-    
+
     if (isNaN(date.getTime())) {
       return null;
     }
-    
-    // Debug logging (remove in production)
-    if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+
+    if (
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV === "development"
+    ) {
       console.log("[parseTableHeader]", {
         header,
         parsed: `${day}.${month + 1}. ${hour}:${minute}`,
@@ -210,10 +243,10 @@ export function parseTableHeader(
         dateUTC: date.toISOString(),
       });
     }
-    
+
     return { date, hour };
   }
-  
+
   // Fallback: try to parse old two-line format (for backward compatibility)
   const parts = normalizedHeader.split(/\s+/);
   if (parts.length < 2) {

@@ -17,6 +17,7 @@ export interface TimeSlot {
   date: Date;
   hour: number;
   selected: boolean;
+  dateKey: string;
 }
 
 export interface EventFormData {
@@ -30,6 +31,34 @@ interface EventFormProps {
   documentTitle: string;
   onSubmit?: (data: EventFormData) => void;
   onBack?: () => void;
+}
+
+function formatInputDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseInputDate(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10) - 1;
+  const day = parseInt(match[3], 10);
+  return new Date(year, month, day);
+}
+
+function createDateKey(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function dateFromDateKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split("-").map((part) => parseInt(part, 10));
+  return new Date(year, month - 1, day);
 }
 
 const generateTimeSlots = (
@@ -120,9 +149,6 @@ const generateTimeSlots = (
   };
 
   const tz = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const startYear = startDate.getFullYear();
-  const startMonth = startDate.getMonth();
-  const startDay = startDate.getDate();
 
   for (let day = 0; day < days; day++) {
     const currentDate = new Date(startDate);
@@ -147,6 +173,7 @@ const generateTimeSlots = (
         date: slotDate,
         hour,
         selected: false,
+        dateKey: createDateKey(year, month, dayOfMonth),
       });
     }
   }
@@ -154,8 +181,8 @@ const generateTimeSlots = (
   return slots;
 };
 
-const formatDate = (date: Date): string => {
-  return date.toLocaleDateString("en-US", {
+const formatDate = (dateKey: string): string => {
+  return dateFromDateKey(dateKey).toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -179,21 +206,13 @@ export default function EventForm({
   const [startDate, setStartDate] = useState(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Format as YYYY-MM-DD in local timezone (not UTC)
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return formatInputDate(today);
   });
   const [endDate, setEndDate] = useState(() => {
     const nextWeek = new Date();
     nextWeek.setHours(0, 0, 0, 0);
     nextWeek.setDate(nextWeek.getDate() + 6);
-    // Format as YYYY-MM-DD in local timezone (not UTC)
-    const year = nextWeek.getFullYear();
-    const month = String(nextWeek.getMonth() + 1).padStart(2, "0");
-    const day = String(nextWeek.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return formatInputDate(nextWeek);
   });
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(() => {
     const today = new Date();
@@ -221,10 +240,12 @@ export default function EventForm({
   const [showAbortDialog, setShowAbortDialog] = useState(false);
 
   const updateTimeSlots = (start: string, end: string) => {
-    const startDateObj = new Date(start);
-    startDateObj.setHours(0, 0, 0, 0);
-    const endDateObj = new Date(end);
-    endDateObj.setHours(0, 0, 0, 0);
+    const startDateObj = parseInputDate(start);
+    const endDateObj = parseInputDate(end);
+
+    if (!startDateObj || !endDateObj) {
+      return;
+    }
 
     if (endDateObj < startDateObj) {
       return;
@@ -253,12 +274,12 @@ export default function EventForm({
     setTimeSlots((prev) => {
       const selectedSlots = new Map<string, boolean>();
       prev.forEach((slot) => {
-        const key = `${slot.date.toDateString()}-${slot.hour}`;
+        const key = `${slot.dateKey}-${slot.hour}`;
         selectedSlots.set(key, slot.selected);
       });
 
       return newSlots.map((slot) => {
-        const key = `${slot.date.toDateString()}-${slot.hour}`;
+        const key = `${slot.dateKey}-${slot.hour}`;
         return {
           ...slot,
           selected: selectedSlots.get(key) || false,
@@ -323,7 +344,7 @@ export default function EventForm({
   };
 
   const groupedSlots = timeSlots.reduce((acc, slot, index) => {
-    const dateKey = slot.date.toDateString();
+    const dateKey = slot.dateKey;
     if (!acc[dateKey]) {
       acc[dateKey] = [];
     }
@@ -331,12 +352,7 @@ export default function EventForm({
     return acc;
   }, {} as Record<string, Array<TimeSlot & { index: number }>>);
 
-  // Sort dates chronologically by converting back to Date objects
-  const dates = Object.keys(groupedSlots).sort((a, b) => {
-    const dateA = new Date(a).getTime();
-    const dateB = new Date(b).getTime();
-    return dateA - dateB;
-  });
+  const dates = Object.keys(groupedSlots).sort();
 
   return (
     <>
@@ -406,13 +422,7 @@ export default function EventForm({
                       onChange={handleStartDateChange}
                       min={(() => {
                         const today = new Date();
-                        const year = today.getFullYear();
-                        const month = String(today.getMonth() + 1).padStart(
-                          2,
-                          "0"
-                        );
-                        const day = String(today.getDate()).padStart(2, "0");
-                        return `${year}-${month}-${day}`;
+                        return formatInputDate(today);
                       })()}
                     />
                   </div>
@@ -444,13 +454,12 @@ export default function EventForm({
                         Time
                       </div>
                       {dates.map((dateKey) => {
-                        const date = new Date(dateKey);
                         return (
                           <div
                             key={dateKey}
                             className="p-2 text-sm font-semibold text-center border-b sticky top-0 z-20 bg-card"
                           >
-                            {formatDate(date)}
+                            {formatDate(dateKey)}
                           </div>
                         );
                       })}

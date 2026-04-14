@@ -19,10 +19,9 @@ export function normalizeApiUrl(url: string): string {
     normalized = `https://${normalized}`;
   }
 
+  normalized = normalized.replace(/\/+$/, "");
+
   if (!normalized.endsWith("/api/v1")) {
-    if (normalized.endsWith("/")) {
-      normalized = normalized.slice(0, -1);
-    }
     normalized = `${normalized}/api/v1`;
   }
 
@@ -166,6 +165,7 @@ export interface Block {
   type: string;
   markdown?: string;
   content?: Block[];
+  blocks?: Block[];
   [key: string]: unknown;
 }
 
@@ -196,11 +196,6 @@ export async function fetchBlock(
   }
 
   const data = await response.json();
-
-  if (data.blocks && Array.isArray(data.blocks) && data.blocks.length > 0) {
-    return data.blocks[0];
-  }
-
   return data;
 }
 
